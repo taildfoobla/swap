@@ -6,7 +6,13 @@ import { processor } from "./processor";
 import { In } from "typeorm";
 import { Block, Log, Context, Transaction, FACTORY_ADDRESS } from "./processor";
 import { assertNotNull } from "@subsquid/evm-processor";
+import { getSwapTransactionModel } from "./schema/getSwapTransactionModel";
+import fs from "fs";
+
 let factoryPools = new Set<string>();
+let address: Object = { etherum: [] };
+let result: Array<any> = [];
+let cacheTrans: Object = { txHash: "", data: {} };
 interface PoolData {
   id: string;
   token0: string;
@@ -97,6 +103,7 @@ async function savePools(ctx: Context, poolsData: PoolData[]) {
 
 async function saveSwaps(ctx: Context, swapsData: SwapData[]) {
   let poolIds = new Set<string>();
+  const SwapModel = getSwapTransactionModel();
   for (let data of swapsData) {
     poolIds.add(data.pool);
   }
@@ -104,23 +111,58 @@ async function saveSwaps(ctx: Context, swapsData: SwapData[]) {
   let poolMap: Map<string, Pool> = new Map(
     pools.map((pool) => [pool.id, pool])
   );
-  let swaps: Swap[] = [];
+  // let swaps: Swap[] = [];
+  let v3Swaps: Array<any> = [];
   for (let data of swapsData) {
     let { id, block, transaction, pool, amount0, amount1, recipient, sender } =
       data;
     let poolEntity = assertNotNull(poolMap.get(pool));
-    let swap = new Swap({
-      id: id,
+    // let swap = new Swap({
+    //   id: id,
+    //   blockNumber: block.height,
+    //   timestamp: new Date(block.timestamp),
+    //   hash: transaction.hash,
+    //   pool: poolEntity,
+    //   sender,
+    //   recipient,
+    //   amount0,
+    //   amount1,
+    // });
+    // swaps.push(swap);
+
+    const document = {
+      id,
       blockNumber: block.height,
       timestamp: new Date(block.timestamp),
-      hash: transaction.hash,
-      pool: poolEntity,
-      sender,
+      txHash: transaction.hash,
+      pool_id: poolEntity.id,
+      pool_token0: poolEntity.token0,
+      pool_token1: poolEntity.token1,
+      amount0: amount0.toString(),
+      amount1: amount1.toString(),
       recipient,
-      amount0,
-      amount1,
+      sender,
+      network: "ethereum",
+      dex: "uniswap_v3",
+    };
+    
+    v3Swaps.push({
+      insertOne: {
+        document,
+      },
     });
-    swaps.push(swap);
+
+    if (!result.includes(poolEntity.token0)) {
+      result.push(poolEntity.token0);
+    }
+    if (!result.includes(poolEntity.token1)) {
+      result.push(poolEntity.token1);
+    }
   }
-  await ctx.store.save(swaps);
+  address = { ...address, etherum: result };
+  fs.writeFileSync("output.json", JSON.stringify(address));
+  await SwapModel.bulkWrite(v3Swaps).then(() => {
+    console.log("success");
+  });
+  // await ctx.store.save(swaps);
 }
