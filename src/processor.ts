@@ -29,7 +29,7 @@ export const processor = new EvmBatchProcessor()
     },
   })
   .setBlockRange({
-    from: 0,
+    from:12000000,
   })
   .addLog({
     address: [FACTORY_ADDRESS],

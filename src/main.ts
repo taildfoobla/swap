@@ -1,4 +1,5 @@
-import { TypeormDatabase } from "@subsquid/typeorm-store";
+// import { TypeormDatabase } from "@subsquid/typeorm-store";
+import { TypeormDatabase } from "./customeDatabase";
 import { Swap, Pool } from "./model";
 import * as poolAbi from "./abi/pool";
 import * as factoryAbi from "./abi/factory";
@@ -8,7 +9,10 @@ import { Block, Log, Context, Transaction, FACTORY_ADDRESS } from "./processor";
 import { assertNotNull } from "@subsquid/evm-processor";
 import { getSwapTransactionModel } from "./schema/getSwapTransactionModel";
 import fs from "fs";
+import { getPoolModel } from "./schema/getPoolModel";
 
+
+let PoolModel = getPoolModel()
 let factoryPools = new Set<string>();
 let address: Object = { etherum: [] };
 let result: Array<any> = [];
@@ -30,9 +34,13 @@ interface SwapData {
 }
 processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
   if (!factoryPools) {
-    factoryPools = await ctx.store
-      .findBy(Pool, {})
-      .then((pools) => new Set(pools.map((pool) => pool.id)));
+    // factoryPools = await ctx.store
+    //   .findBy(Pool, {})
+    //   .then((pools) => new Set(pools.map((pool) => pool.id)));
+   factoryPools= await PoolModel
+    .find({})
+    .then((pools:any) => new Set(pools.map((pool:any) => pool.id)));
+    
   }
   let swapsData: SwapData[] = [];
   let poolsData: PoolData[] = [];
@@ -56,7 +64,9 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
       }
     }
   }
+ 
   await savePools(ctx, poolsData);
+ 
   await saveSwaps(ctx, swapsData);
 });
 
@@ -88,28 +98,34 @@ function getSwapData(log: Log) {
 }
 
 async function savePools(ctx: Context, poolsData: PoolData[]) {
-  let pools: Pool[] = [];
+  let pools: Array<any> = [];
   for (let data of poolsData) {
-    let pool = new Pool({
+    let pool = new PoolModel({
       id: data.id,
       token0: data.token0,
       token1: data.token1,
     });
     pools.push(pool);
+    pool.save()
     factoryPools.add(data.id);
+  
   }
-  await ctx.store.save(pools);
+  // await PoolModel.insertMany(pools);
 }
 
 async function saveSwaps(ctx: Context, swapsData: SwapData[]) {
+
   let poolIds = new Set<string>();
+
   const SwapModel = getSwapTransactionModel();
   for (let data of swapsData) {
+
     poolIds.add(data.pool);
   }
-  let pools = await ctx.store.findBy(Pool, { id: In([...poolIds]) });
+
+  let pools = await PoolModel.find({id:{$in:Array.from(poolIds)}});
   let poolMap: Map<string, Pool> = new Map(
-    pools.map((pool) => [pool.id, pool])
+    pools.map((pool:any) => [pool.id, pool])
   );
   // let swaps: Swap[] = [];
   let v3Swaps: Array<any> = [];
@@ -130,7 +146,7 @@ async function saveSwaps(ctx: Context, swapsData: SwapData[]) {
     // });
     // swaps.push(swap);
 
-    const document = {
+    const document = new SwapModel ({
       id,
       blockNumber: block.height,
       timestamp: new Date(block.timestamp),
@@ -144,8 +160,9 @@ async function saveSwaps(ctx: Context, swapsData: SwapData[]) {
       sender,
       network: "ethereum",
       dex: "uniswap_v3",
-    };
-    
+      from:transaction.from
+    });
+    document.save()
     v3Swaps.push({
       insertOne: {
         document,
@@ -161,8 +178,8 @@ async function saveSwaps(ctx: Context, swapsData: SwapData[]) {
   }
   address = { ...address, etherum: result };
   fs.writeFileSync("output.json", JSON.stringify(address));
-  await SwapModel.bulkWrite(v3Swaps).then(() => {
-    console.log("success");
-  });
+  // await SwapModel.bulkWrite(v3Swaps).then(() => {
+  //   console.log("success");
+  // });
   // await ctx.store.save(swaps);
 }
