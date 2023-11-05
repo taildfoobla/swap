@@ -10,8 +10,11 @@ import {
 } from '@subsquid/evm-processor'
 import {Store} from '@subsquid/typeorm-store'
 import * as erc20abi from '../abi/erc20'
+import * as uniswapV3EthFactoryAbi from '../abi/uniswap_v3_ethereum_factory'
+import * as uniswapV3EthPoolAbi from '../abi/uniswap_v3_ethereum_pool'
 
-export const ETH_USDC_ADDRESS = '0x7EA2be2df7BA6E54B1A9C70676f668455E329d29'.toLowerCase()
+
+export const ETH_ADDRESS = ['0x1f98431c8ad98523631ae4a59f267346ea31f984'.toLowerCase()]
 
 export const processor = new EvmBatchProcessor()
     .setDataSource({
@@ -39,9 +42,13 @@ export const processor = new EvmBatchProcessor()
         from: 16_000_000,
     })
     .addLog({
-        address: [ETH_USDC_ADDRESS],
-        topic0: [erc20abi.events.Transfer.topic]
+        address: ETH_USDC_ADDRESS,
+        topic0: [uniswapV3EthFactoryAbi.events.PoolCreated.topic],
     })
+    .addLog({
+        topic0: [uniswapV3EthPoolAbi.events.Swap.topic],
+        transaction: true,
+      });
 
 export type Fields = EvmBatchProcessorFields<typeof processor>
 export type Context = DataHandlerContext<Store, Fields>
