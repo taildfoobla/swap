@@ -1,0 +1,9 @@
+{
+    "apps": [
+        {
+            "name": "swap-eth",
+            "script": "sqd",
+            "args" : "process:eth"
+        }
+    ]
+}
