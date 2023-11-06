@@ -10,8 +10,23 @@ import {
 } from '@subsquid/evm-processor'
 import {Store} from '@subsquid/typeorm-store'
 import * as erc20abi from '../abi/erc20'
+import { factoryAddress } from '../address/factory_address'
+import * as pancakeswapV3BscFactoryAbi from '../abi/pancakeswap_v3_binance_factory'
+import * as pancakeswapV3BscPoolAbi from '../abi/pancakeswap_v3_binance_pool'
+import * as pancakeswapV2BscFactoryAbi from '../abi/pancakeswap_v2_binance_factory'
+import * as pancakeswapV2BscPoolAbi from '../abi/pancakeswap_v2_binance_pool'
 
-export const BSC_USDC_ADDRESS = '0x8965349fb649A33a30cbFDa057D8eC2C48AbE2A2'.toLowerCase()
+function renderFactoryAddress (){
+    const data:string[] =[]
+    factoryAddress.forEach((item:any)=>{
+        if(item?.network==="binance"){
+            data.push(item?.address?.toLowerCase())
+        }
+    })
+    return data
+}
+
+export const BSC_ADDRESS:string[] = renderFactoryAddress()
 
 export const processor = new EvmBatchProcessor()
     .setDataSource({
@@ -39,9 +54,13 @@ export const processor = new EvmBatchProcessor()
         from: 27_000_000,
     })
     .addLog({
-        address: [BSC_USDC_ADDRESS],
-        topic0: [erc20abi.events.Transfer.topic]
+        address: BSC_ADDRESS,
+        topic0: [pancakeswapV3BscFactoryAbi.events.PoolCreated.topic,pancakeswapV2BscFactoryAbi.events.PairCreated.topic],
     })
+    .addLog({
+        topic0: [pancakeswapV3BscPoolAbi.events.Swap.topic,pancakeswapV2BscPoolAbi.events.Swap.topic],
+        transaction: true,
+      });
 
 export type Fields = EvmBatchProcessorFields<typeof processor>
 export type Context = DataHandlerContext<Store, Fields>

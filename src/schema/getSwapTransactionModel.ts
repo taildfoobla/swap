@@ -12,16 +12,16 @@ import { Decimal128 } from "typeorm";
 //   "mongodb://moonfit-mongodb1:27017,moonfit-mongodb3:27017,moonfit-mongodbarbiter:27017/pj5545?replicaSet=pp5545" as string
 // );
 
-const mongoose = createConnection(
-  "mongodb+srv://taild:RAwNxMCiIVC6tkCq@cluster0.z1xx4yf.mongodb.net/swap" as string
-);
+// const mongoose = createConnection(
+//   "mongodb+srv://taild:RAwNxMCiIVC6tkCq@cluster0.z1xx4yf.mongodb.net/swap" as string
+// );
 
 // const mongoose = createConnection(
 //   "mongodb://mf.xyz:27017/local_pj5545" as string
 // );
-// const mongoose = createConnection(
-//   "mongodb://localhost:27017/blocks" as string
-// );
+const mongoose = createConnection(
+  "mongodb://localhost:27017/blocks" as string
+);
 
 export interface ISwapTransaction {
   id: String;
@@ -76,7 +76,7 @@ SwapTransactionSchema.index({ recipient: 1 });
 export const getSwapTransactionModel = () => {
   // @ts-ignore
   return mongoose.model<ISwapTransaction, ISwapTransactionModel>(
-    `swap_transactions_test`,
+    `swap_transactions`,
     SwapTransactionSchema
   );
 };

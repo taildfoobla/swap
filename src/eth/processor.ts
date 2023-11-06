@@ -9,12 +9,24 @@ import {
     Transaction as _Transaction,
 } from '@subsquid/evm-processor'
 import {Store} from '@subsquid/typeorm-store'
+import { factoryAddress } from '../address/factory_address'
 import * as erc20abi from '../abi/erc20'
 import * as uniswapV3EthFactoryAbi from '../abi/uniswap_v3_ethereum_factory'
 import * as uniswapV3EthPoolAbi from '../abi/uniswap_v3_ethereum_pool'
+import * as uniswapV2EthFactoryAbi from '../abi/uniswap_v2_ethereum_factory'
+import * as uniswapV2EthPoolAbi from '../abi/uniswap_v2_ethereum_pool'
 
+function renderFactoryAddress (){
+    const data:string[] =[]
+    factoryAddress.forEach((item:any)=>{
+        if(item?.network==="ethereum"){
+            data.push(item?.address?.toLowerCase())
+        }
+    })
+    return data
+}
 
-export const ETH_ADDRESS = ['0x1f98431c8ad98523631ae4a59f267346ea31f984'.toLowerCase()]
+export const ETH_ADDRESS:string[] =renderFactoryAddress()
 
 export const processor = new EvmBatchProcessor()
     .setDataSource({
@@ -42,11 +54,11 @@ export const processor = new EvmBatchProcessor()
         from: 16_000_000,
     })
     .addLog({
-        address: ETH_USDC_ADDRESS,
-        topic0: [uniswapV3EthFactoryAbi.events.PoolCreated.topic],
+        address: ETH_ADDRESS,
+        topic0: [uniswapV3EthFactoryAbi.events.PoolCreated.topic,uniswapV2EthFactoryAbi.events.PairCreated.topic],
     })
     .addLog({
-        topic0: [uniswapV3EthPoolAbi.events.Swap.topic],
+        topic0: [uniswapV3EthPoolAbi.events.Swap.topic,uniswapV2EthPoolAbi.events.Swap.topic],
         transaction: true,
       });
 
