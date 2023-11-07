@@ -31,8 +31,8 @@ const renderDataFromJson = (
 
 let PoolModel = getPoolModel();
 let factoryPools = new Set<string>();
-let address: Object = readJsonFromFile("output.json") || { bsc: [] };
-let result: Array<any> = renderDataFromJson(address,"bsc");
+// let address: Object = readJsonFromFile("output.json") || { bsc: [] };
+// let result: Array<any> = renderDataFromJson(address,"bsc");
 let cacheTrans: Object = { txHash: "", data: {} };
 interface PoolData {
   id: string;
@@ -302,15 +302,15 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
     }
     Swaps.push(document);
 
-    if (!result.includes(poolEntity.token0)) {
-      result.push(poolEntity.token0);
-    }
-    if (!result.includes(poolEntity.token1)) {
-      result.push(poolEntity.token1);
-    }
+    // if (!result.includes(poolEntity.token0)) {
+    //   result.push(poolEntity.token0);
+    // }
+    // if (!result.includes(poolEntity.token1)) {
+    //   result.push(poolEntity.token1);
+    // }
   }
-  address = { ...address, bsc: result };
-  writeJsonToFile("output.json", address);
+  // address = { ...address, bsc: result };
+  // writeJsonToFile("output.json", address);
   await SwapModel.insertMany(Swaps,{ ordered: false }).then(() => {
     console.log('BSC swaps inserted successfully');
   })

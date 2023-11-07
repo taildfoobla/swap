@@ -27,8 +27,8 @@ const renderDataFromJson = (obj: { [key: string]: any }, network: string) => {
 
 let PoolModel = getPoolModel();
 let factoryPools = new Set<string>();
-let address: Object = readJsonFromFile("output.json") || { eth: [] };
-let result: Array<any> = renderDataFromJson(address, "eth");
+// let address: Object = readJsonFromFile("output.json") || { eth: [] };
+// let result: Array<any> = renderDataFromJson(address, "eth");
 let cacheTrans: Object = { txHash: "", data: {} };
 interface PoolData {
   id: string;
@@ -324,16 +324,16 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
     }
     Swaps.push(document);
 
-    if (!result.includes(poolEntity.token0)) {
-      result.push(poolEntity.token0);
-    }
-    if (!result.includes(poolEntity.token1)) {
-      result.push(poolEntity.token1);
-    }
+    // if (!result.includes(poolEntity.token0)) {
+    //   result.push(poolEntity.token0);
+    // }
+    // if (!result.includes(poolEntity.token1)) {
+    //   result.push(poolEntity.token1);
+    // }
   }
 
-  address = { ...address, eth: result };
-  writeJsonToFile("output.json", address);
+  // address = { ...address, eth: result };
+  // writeJsonToFile("output.json", address);
   await SwapModel.insertMany(Swaps, { ordered: false }).then(() => {
     console.log('ETH swaps inserted successfully');
   })
