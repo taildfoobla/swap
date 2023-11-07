@@ -232,12 +232,12 @@ async function savePools(ctx: Context, poolsData: PoolData[]) {
     factoryPools.add(data.id);
   }
   await PoolModel.insertMany(pools, { ordered: false })
-    .then(() => {
-      console.log("ETH pools inserted successfully");
-    })
-    .catch((error: Error) => {
-      console.error("Error inserting ETH pools:", error);
-    });
+    // .then(() => {
+    //   console.log("ETH pools inserted successfully");
+    // })
+    // .catch((error: Error) => {
+    //   console.error("Error inserting ETH pools:", error);
+    // });
 }
 
 async function saveSwaps(ctx: Context, swapsData: Array<any>) {
@@ -335,9 +335,9 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
   // address = { ...address, eth: result };
   // writeJsonToFile("output.json", address);
   await SwapModel.insertMany(Swaps, { ordered: false }).then(() => {
-    console.log('ETH swaps inserted successfully');
+    console.log('ETH swaps inserted successfully',Swaps);
   })
-  .catch((error:Error) => {
-    console.error('Error inserting ETH swaps:', error);
-  });
+  // .catch((error:Error) => {
+  //   console.error('Error inserting ETH swaps:', error);
+  // });
 }
