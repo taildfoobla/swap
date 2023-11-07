@@ -47,7 +47,7 @@ const SwapTransactionSchema = new Schema<
   ISwapTransactionModel
 >(
   {
-    id: { type: String},
+    id: { type: String,unique:true},
     blockNumber: Number,
     timestamp: Date,
     txHash: String,
