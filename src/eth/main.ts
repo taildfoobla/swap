@@ -7,32 +7,28 @@ import { getSwapTransactionModel } from "../schema/getSwapTransactionModel";
 import fs from "fs";
 import { renderInOutToken } from "../utils";
 import { getPoolModel } from "../schema/getPoolModel";
-import { readJsonFromFile,writeJsonToFile } from "../utils";
+import { readJsonFromFile, writeJsonToFile } from "../utils";
 import * as uniswapV3EthFactoryAbi from "../abi/uniswap_v3_ethereum_factory";
 import * as uniswapV3EthPoolAbi from "../abi/uniswap_v3_ethereum_pool";
 import * as uniswapV2EthFactoryAbi from "../abi/uniswap_v2_ethereum_factory";
 import * as uniswapV2EthPoolAbi from "../abi/uniswap_v2_ethereum_pool";
 
-const renderDataFromJson = (
-  obj: { [key: string]: any },
-  network: string
-) => {
-  let arr:Array<any>=[]
+const renderDataFromJson = (obj: { [key: string]: any }, network: string) => {
+  let arr: Array<any> = [];
   for (let key in obj) {
-      if (obj.hasOwnProperty(key)) {
-          if (key == network) {
-              arr = obj[key];
-          }
+    if (obj.hasOwnProperty(key)) {
+      if (key == network) {
+        arr = obj[key];
       }
+    }
   }
   return arr;
 };
 
-
 let PoolModel = getPoolModel();
 let factoryPools = new Set<string>();
 let address: Object = readJsonFromFile("output.json") || { eth: [] };
-let result: Array<any> = renderDataFromJson(address,"eth");
+let result: Array<any> = renderDataFromJson(address, "eth");
 let cacheTrans: Object = { txHash: "", data: {} };
 interface PoolData {
   id: string;
@@ -53,54 +49,57 @@ interface SwapData {
   amount1In: bigint;
   amount1Out: bigint;
 }
-processor.run(new TypeormDatabase({ supportHotBlocks: true,stateSchema: 'eth_processor' }), async (ctx) => {
-  if (!factoryPools) {
-    // factoryPools = await ctx.store
-    //   .findBy(Pool, {})
-    //   .then((pools) => new Set(pools.map((pool) => pool.id)));
-    factoryPools = await PoolModel.find({}).then(
-      (pools: any) => new Set(pools.map((pool: any) => pool.id))
-    );
-  }
-  let swapsData = [];
-  let poolsData = [];
-  for (let block of ctx.blocks) {
-    for (let log of block.logs) {
-      if (
-        log.topics[0] == uniswapV3EthFactoryAbi.events.PoolCreated.topic &&
-        ETH_ADDRESS.includes(log.address)
-      ) {
-        //process log data
-        let poolData = getPoolData(log, "uniswapv3");
-        poolsData.push(poolData);
-      } else if (
-        log.topics[0] == uniswapV2EthFactoryAbi.events.PairCreated.topic &&
-        ETH_ADDRESS.includes(log.address)
-      ) {
-        let poolData = getPoolData(log, "uniswapv2");
-        poolsData.push(poolData);
-      }
-      if (
-        log.topics[0] == uniswapV3EthPoolAbi.events.Swap.topic &&
-        factoryPools.has(log.address)
-      ) {
-        //process swap data
-        let swapData = getSwapData(log, "uniswapv3");
-        swapsData.push(swapData);
-      } else if (
-        log.topics[0] == uniswapV2EthPoolAbi.events.Swap.topic &&
-        factoryPools.has(log.address)
-      ) {
-        let swapData = getSwapData(log, "uniswapv2");
-        swapsData.push(swapData);
+processor.run(
+  new TypeormDatabase({ supportHotBlocks: true, stateSchema: "eth_processor" }),
+  async (ctx) => {
+    if (!factoryPools) {
+      // factoryPools = await ctx.store
+      //   .findBy(Pool, {})
+      //   .then((pools) => new Set(pools.map((pool) => pool.id)));
+      factoryPools = await PoolModel.find({}).then(
+        (pools: any) => new Set(pools.map((pool: any) => pool.id))
+      );
+    }
+    let swapsData = [];
+    let poolsData = [];
+    for (let block of ctx.blocks) {
+      for (let log of block.logs) {
+        if (
+          log.topics[0] == uniswapV3EthFactoryAbi.events.PoolCreated.topic &&
+          ETH_ADDRESS.includes(log.address)
+        ) {
+          //process log data
+          let poolData = getPoolData(log, "uniswapv3");
+          poolsData.push(poolData);
+        } else if (
+          log.topics[0] == uniswapV2EthFactoryAbi.events.PairCreated.topic &&
+          ETH_ADDRESS.includes(log.address)
+        ) {
+          let poolData = getPoolData(log, "uniswapv2");
+          poolsData.push(poolData);
+        }
+        if (
+          log.topics[0] == uniswapV3EthPoolAbi.events.Swap.topic &&
+          factoryPools.has(log.address)
+        ) {
+          //process swap data
+          let swapData = getSwapData(log, "uniswapv3");
+          swapsData.push(swapData);
+        } else if (
+          log.topics[0] == uniswapV2EthPoolAbi.events.Swap.topic &&
+          factoryPools.has(log.address)
+        ) {
+          let swapData = getSwapData(log, "uniswapv2");
+          swapsData.push(swapData);
+        }
       }
     }
+
+    await savePools(ctx, poolsData);
+
+    await saveSwaps(ctx, swapsData);
   }
-
-  await savePools(ctx, poolsData);
-
-  await saveSwaps(ctx, swapsData);
-});
+);
 
 function decodePoolLog(log: Log, type: string) {
   let event;
@@ -227,12 +226,18 @@ async function savePools(ctx: Context, poolsData: PoolData[]) {
       id: data.id,
       token0: data.token0,
       token1: data.token1,
-    }
+    };
     pools.push(pool);
-    
+
     factoryPools.add(data.id);
   }
-  await PoolModel.insertMany(pools,{ ordered: false });
+  await PoolModel.insertMany(pools, { ordered: false })
+    .then(() => {
+      console.log("ETH pools inserted successfully");
+    })
+    .catch((error: Error) => {
+      console.error("Error inserting ETH pools:", error);
+    });
 }
 
 async function saveSwaps(ctx: Context, swapsData: Array<any>) {
@@ -250,8 +255,20 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
   // let swaps: Swap[] = [];
   let Swaps: Array<any> = [];
   for (let data of swapsData) {
-    let { id, block, transaction, pool, amount0, amount1,amount0In,amount0Out,amount1In,amount1Out, recipient, sender } =
-      data;
+    let {
+      id,
+      block,
+      transaction,
+      pool,
+      amount0,
+      amount1,
+      amount0In,
+      amount0Out,
+      amount1In,
+      amount1Out,
+      recipient,
+      sender,
+    } = data;
     let poolEntity = assertNotNull(poolMap.get(pool));
     // let swap = new Swap({
     //   id: id,
@@ -265,9 +282,9 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
     //   amount1,
     // });
     // swaps.push(swap);
-    let document
-    if(amount0&&amount1){
-      document ={
+    let document;
+    if (amount0 && amount1) {
+      document = {
         id,
         blockNumber: block.height,
         timestamp: new Date(block.timestamp),
@@ -280,8 +297,8 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
         recipient,
         sender,
         from: transaction.from,
-      }
-    }else{
+      };
+    } else {
       const inOutToken = renderInOutToken(
         amount0In,
         amount0Out,
@@ -290,7 +307,7 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
         poolEntity.token0,
         poolEntity.token1
       );
-      document={
+      document = {
         id,
         blockNumber: block.height,
         timestamp: new Date(block.timestamp),
@@ -302,8 +319,8 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
         amount1: inOutToken.amount1.toString(),
         recipient,
         sender,
-        from:transaction.from
-      }
+        from: transaction.from,
+      };
     }
     Swaps.push(document);
 
@@ -314,11 +331,13 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
       result.push(poolEntity.token1);
     }
   }
- 
+
   address = { ...address, eth: result };
-    writeJsonToFile("output.json", address);
-  await SwapModel.insertMany(Swaps,{ ordered: false }).then(() => {
-    console.log("success");
+  writeJsonToFile("output.json", address);
+  await SwapModel.insertMany(Swaps, { ordered: false }).then(() => {
+    console.log('ETH swaps inserted successfully');
+  })
+  .catch((error:Error) => {
+    console.error('Error inserting ETH swaps:', error);
   });
- 
 }

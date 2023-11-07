@@ -232,7 +232,13 @@ async function savePools(ctx: Context, poolsData: PoolData[]) {
     
     factoryPools.add(data.id);
   }
-  await PoolModel.insertMany(pools,{ ordered: false });
+  await PoolModel.insertMany(pools,{ ordered: false })
+  .then(() => {
+    console.log("BSC pools inserted successfully");
+  })
+  .catch((error: Error) => {
+    console.error("Error inserting BSC pools:", error);
+  });;
 }
 
 async function saveSwaps(ctx: Context, swapsData: Array<any>) {
@@ -306,7 +312,10 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
   address = { ...address, bsc: result };
   writeJsonToFile("output.json", address);
   await SwapModel.insertMany(Swaps,{ ordered: false }).then(() => {
-    console.log("success");
+    console.log('BSC swaps inserted successfully');
+  })
+  .catch((error:Error) => {
+    console.error('Error inserting BSC swaps:', error);
   });
  
 }
