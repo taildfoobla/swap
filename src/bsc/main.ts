@@ -313,7 +313,7 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
   // writeJsonToFile("output.json", address);
   await SwapModel.insertMany(Swaps,{ ordered: false })
   .then(() => {
-    console.log('BSC swaps inserted successfully',Swaps);
+    console.log('BSC swaps inserted successfully',Swaps.length);
   })
   // .catch((error:Error) => {
   //   console.error('Error inserting BSC swaps:', error);
