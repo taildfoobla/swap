@@ -12,6 +12,9 @@ import * as pancakeswapV3BscFactoryAbi from '../abi/pancakeswap_v3_binance_facto
 import * as pancakeswapV3BscPoolAbi from '../abi/pancakeswap_v3_binance_pool'
 import * as pancakeswapV2BscFactoryAbi from '../abi/pancakeswap_v2_binance_factory'
 import * as pancakeswapV2BscPoolAbi from '../abi/pancakeswap_v2_binance_pool'
+import PoolPostgre from "../model/generated/pool.model";
+import SwapPostgre from "../model/generated/swap.model";
+
 
 const renderDataFromJson = (
     obj: { [key: string]: any },
@@ -29,7 +32,7 @@ const renderDataFromJson = (
   };
 
 
-let PoolModel = getPoolModel();
+// let PoolModel = getPoolModel();
 let factoryPools = new Set<string>();
 // let address: Object = readJsonFromFile("output.json") || { bsc: [] };
 // let result: Array<any> = renderDataFromJson(address,"bsc");
@@ -58,7 +61,7 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true,stateSchema: 'bsc_pro
     // factoryPools = await ctx.store
     //   .findBy(Pool, {})
     //   .then((pools) => new Set(pools.map((pool) => pool.id)));
-    factoryPools = await PoolModel.find({}).then(
+    factoryPools = await PoolPostgre.findAll().then(
       (pools: any) => new Set(pools.map((pool: any) => pool.id))
     );
   }
@@ -224,7 +227,7 @@ async function savePools(ctx: Context, poolsData: PoolData[]) {
   let pools: Array<any> = [];
   for (let data of poolsData) {
     let pool = {
-      id: data.id,
+      idSquid: data.id,
       token0: data.token0,
       token1: data.token1,
     }
@@ -232,7 +235,11 @@ async function savePools(ctx: Context, poolsData: PoolData[]) {
     
     factoryPools.add(data.id);
   }
-  await PoolModel.insertMany(pools,{ ordered: false })
+
+  await PoolPostgre.bulkCreate(pools,{ignoreDuplicates:true})
+
+
+  // await PoolModel.insertMany(pools,{ ordered: false })
   // .then(() => {
   //   console.log("BSC pools inserted successfully");
   // })
@@ -244,12 +251,14 @@ async function savePools(ctx: Context, poolsData: PoolData[]) {
 async function saveSwaps(ctx: Context, swapsData: Array<any>) {
   let poolIds = new Set<string>();
 
-  const SwapModel = getSwapTransactionModel();
+  // const SwapModel = getSwapTransactionModel();
   for (let data of swapsData) {
     poolIds.add(data.pool);
   }
 
-  let pools = await PoolModel.find({ id: { $in: Array.from(poolIds) } });
+  // let pools = await PoolModel.find({ id: { $in: Array.from(poolIds) } });
+  let pools = await PoolPostgre.findAll({ where: { idSquid: Array.from(poolIds) } });
+
   let poolMap: Map<string, any> = new Map(
     pools.map((pool: any) => [pool.id, pool])
   );
@@ -263,7 +272,7 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
     let document
     if(amount0&&amount1){
       document ={
-        id,
+        idSquid:id,
         blockNumber: block.height,
         timestamp: new Date(block.timestamp),
         txHash: transaction.hash,
@@ -286,7 +295,7 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
         poolEntity.token1
       );
       document={
-        id,
+        idSquid:id,
         blockNumber: block.height,
         timestamp: new Date(block.timestamp),
         txHash: transaction.hash,
@@ -311,10 +320,16 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
   }
   // address = { ...address, bsc: result };
   // writeJsonToFile("output.json", address);
-  await SwapModel.insertMany(Swaps,{ ordered: false })
-  .then(() => {
-    console.log('BSC swaps inserted successfully',Swaps.length);
+  
+  await SwapPostgre.bulkCreate(Swaps,{ignoreDuplicates:true}).then(() => {
+    console.log('ETH swaps inserted successfully',Swaps.length);
   })
+
+  // await SwapModel.insertMany(Swaps,{ ordered: false })
+  // .then(() => {
+  //   console.log('BSC swaps inserted successfully',Swaps.length);
+  // })
+
   // .catch((error:Error) => {
   //   console.error('Error inserting BSC swaps:', error);
   // });

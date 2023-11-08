@@ -58,8 +58,6 @@ const SwapTransactionSchema = new Schema<
     pool_id: String,
     pool_token0: String,
     pool_token1: String,
-    network:String,
-    dex:String,
     from:String
   },
   { versionKey: false }
