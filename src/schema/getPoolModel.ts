@@ -34,7 +34,7 @@ const PoolSchema = new Schema<
   IPoolModel
 >(
   {
-    id:{type:String,unique:true},
+    id:{type:String},
     token0:String,
     token1:String,
   },
