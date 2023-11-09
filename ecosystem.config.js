@@ -1,14 +1,14 @@
 
 const apps = [
     {
-        "name": "Swap-BSC",
+        "name": "Swap_ETH_Uniswap_v2",
         "script": "sqd",
-        "args" : "process:bsc"
+        "args" : "process:eth_uniswap_v2"
     },
     {
-        "name": "Swap-Eth",
+        "name": "Swap_ETH_Uniswap_v3",
         "script": "sqd",
-        "args" : "process:eth"
+        "args" : "process:eth_uniswap_v3"
     }
 
 ];

@@ -12,7 +12,7 @@ import * as uniswapV3EthFactoryAbi from "../abi/uniswap_v3_ethereum_factory";
 import * as uniswapV3EthPoolAbi from "../abi/uniswap_v3_ethereum_pool";
 import * as uniswapV2EthFactoryAbi from "../abi/uniswap_v2_ethereum_factory";
 import * as uniswapV2EthPoolAbi from "../abi/uniswap_v2_ethereum_pool";
-import PoolPostgre from "../model/generated/pool.model";
+import PoolPostgre from "./pool.model";
 import SwapPostgre from "../model/generated/swap.model";
 
 
@@ -55,7 +55,7 @@ interface SwapData {
 
 
 processor.run(
-  new TypeormDatabase({ supportHotBlocks: true, stateSchema: "eth_processor_postgres_0" }),
+  new TypeormDatabase({ supportHotBlocks: true, stateSchema: "eth_processor_uniswapv3" }),
   async (ctx) => {
     await PoolPostgre.sync()
     await SwapPostgre.sync()
@@ -72,32 +72,36 @@ processor.run(
     let poolsData = [];
     for (let block of ctx.blocks) {
       for (let log of block.logs) {
+        // if (
+        //   log.topics[0] == uniswapV3EthFactoryAbi.events.PoolCreated.topic &&
+        //   ETH_ADDRESS==log.address
+        // ) {
+        //   //process log data
+        //   let poolData = getPoolData(log, "uniswapv3");
+        //   poolsData.push(poolData);
+        // } else 
+        
         if (
           log.topics[0] == uniswapV3EthFactoryAbi.events.PoolCreated.topic &&
-          ETH_ADDRESS.includes(log.address)
+          ETH_ADDRESS==log.address
         ) {
-          //process log data
-          let poolData = getPoolData(log, "uniswapv3");
-          poolsData.push(poolData);
-        } else if (
-          log.topics[0] == uniswapV2EthFactoryAbi.events.PairCreated.topic &&
-          ETH_ADDRESS.includes(log.address)
-        ) {
-          let poolData = getPoolData(log, "uniswapv2");
+          let poolData = getPoolData(log);
           poolsData.push(poolData);
         }
-        if (
+
+        // if (
+        //   log.topics[0] == uniswapV3EthPoolAbi.events.Swap.topic &&
+        //   factoryPools.has(log.address)
+        // ) {
+        //   //process swap data
+        //   let swapData = getSwapData(log, "uniswapv3");
+        //   swapsData.push(swapData);
+        // } else
+         if (
           log.topics[0] == uniswapV3EthPoolAbi.events.Swap.topic &&
           factoryPools.has(log.address)
         ) {
-          //process swap data
-          let swapData = getSwapData(log, "uniswapv3");
-          swapsData.push(swapData);
-        } else if (
-          log.topics[0] == uniswapV2EthPoolAbi.events.Swap.topic &&
-          factoryPools.has(log.address)
-        ) {
-          let swapData = getSwapData(log, "uniswapv2");
+          let swapData = getSwapData(log);
           swapsData.push(swapData);
         }
       }
@@ -109,36 +113,19 @@ processor.run(
   }
 );
 
-function decodePoolLog(log: Log, type: string) {
+function decodePoolLog(log: Log) {
   let event;
-  switch (type) {
-    case "uniswapv3":
+  
       event = uniswapV3EthFactoryAbi.events.PoolCreated.decode(log);
       return {
         pool: event.pool,
         token0: event.token0,
         token1: event.token1,
       };
-    case "uniswapv2":
-      event = uniswapV2EthFactoryAbi.events.PairCreated.decode(log);
-      return {
-        pool: event.pair,
-        token0: event.token0,
-        token1: event.token1,
-      };
-    default:
-      return {
-        pool: "",
-        token0: "",
-        token1: "",
-      };
-  }
 }
 
-function decodeSwapLog(log: Log, type: string) {
+function decodeSwapLog(log: Log) {
   let event;
-  switch (type) {
-    case "uniswapv3":
       event = uniswapV3EthPoolAbi.events.Swap.decode(log);
       return {
         amount0: event.amount0,
@@ -146,33 +133,10 @@ function decodeSwapLog(log: Log, type: string) {
         recipient: event.recipient,
         sender: event.sender,
       };
-    case "uniswapv2":
-      event = uniswapV2EthPoolAbi.events.Swap.decode(log);
-      return {
-        amount0In: event.amount0In,
-        amount0Out: event.amount0Out,
-        amount1In: event.amount1In,
-        amount1Out: event.amount1Out,
-        to: event.to,
-        sender: event.sender,
-      };
-    default:
-      return {
-        amount0: "",
-        amount1: "",
-        amount0In: "",
-        amount0Out: "",
-        amount1In: "",
-        amount1Out: "",
-        to: "",
-        sender: "",
-        recipient: "",
-      };
-  }
 }
 
-function getPoolData(log: Log, type: string): PoolData {
-  let event = decodePoolLog(log, type);
+function getPoolData(log: Log): PoolData {
+  let event = decodePoolLog(log);
 
   return {
     id: event?.pool.toLowerCase(),
@@ -181,13 +145,12 @@ function getPoolData(log: Log, type: string): PoolData {
   };
 }
 
-function getSwapData(log: Log, type: string) {
+function getSwapData(log: Log) {
   let transaction = assertNotNull(
     log.transaction,
     "Swap log without transaction"
   );
-  let event = decodeSwapLog(log, type);
-  if (type === "uniswapv3") {
+  let event = decodeSwapLog(log);
     return {
       id: log.id,
       block: log.block,
@@ -198,33 +161,6 @@ function getSwapData(log: Log, type: string) {
       recipient: event?.recipient?.toLowerCase(),
       sender: event.sender.toLowerCase(),
     };
-  } else if (type === "uniswapv2") {
-    return {
-      id: log.id,
-      block: log.block,
-      transaction: transaction,
-      pool: log.address.toLowerCase(),
-      amount0In: event.amount0In,
-      amount0Out: event.amount0Out,
-      amount1In: event.amount1In,
-      amount1Out: event.amount1Out,
-      recipient: event?.to?.toLowerCase(),
-      sender: event.sender.toLowerCase(),
-    };
-  } else {
-    return {
-      id: log.id,
-      block: log.block,
-      transaction: transaction,
-      pool: log.address.toLowerCase(),
-      amount0In: "",
-      amount0Out: "",
-      amount1In: "",
-      amount1Out: "",
-      recipient: "",
-      sender: "",
-    };
-  }
 }
 
 async function savePools(ctx: Context, poolsData: PoolData[]) {
@@ -281,20 +217,7 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
       sender,
     } = data;
     let poolEntity = assertNotNull(poolMap.get(pool));
-    // let swap = new Swap({
-    //   id: id,
-    //   blockNumber: block.height,
-    //   timestamp: new Date(block.timestamp),
-    //   hash: transaction.hash,
-    //   pool: poolEntity,
-    //   sender,
-    //   recipient,
-    //   amount0,
-    //   amount1,
-    // });
-    // swaps.push(swap);
     let document;
-    if (amount0 && amount1) {
       document = {
         idSquid:id,
         blockNumber: block.height,
@@ -309,42 +232,11 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
         sender,
         from: transaction.from,
       };
-    } else {
-      const inOutToken = renderInOutToken(
-        amount0In,
-        amount0Out,
-        amount1In,
-        amount1Out,
-        poolEntity.token0,
-        poolEntity.token1
-      );
-      document = {
-        idSquid:id,
-        blockNumber: block.height,
-        timestamp: new Date(block.timestamp),
-        txHash: transaction.hash,
-        pool_id: poolEntity.address,
-        pool_token0: inOutToken.token0,
-        pool_token1: inOutToken.token1,
-        amount0: inOutToken.amount0.toString(),
-        amount1: inOutToken.amount1.toString(),
-        recipient,
-        sender,
-        from: transaction.from,
-      };
-    }
+    
     Swaps.push(document);
 
-    // if (!result.includes(poolEntity.token0)) {
-    //   result.push(poolEntity.token0);
-    // }
-    // if (!result.includes(poolEntity.token1)) {
-    //   result.push(poolEntity.token1);
-    // }
   }
 
-  // address = { ...address, eth: result };
-  // writeJsonToFile("output.json", address);
   await SwapPostgre.bulkCreate(Swaps,{ignoreDuplicates:true}).then(() => {
     console.log('ETH swaps inserted successfully',Swaps.length);
   })

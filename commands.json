@@ -49,6 +49,16 @@
         "deps": ["build", "migration:apply"],
         "cmd": ["node", "--require=dotenv/config", "lib/eth/main.js"]
       },
+      "process:eth_uniswap_v2": {
+        "description": "Load .env and start the ETH squid processor",
+        "deps": ["build", "migration:apply"],
+        "cmd": ["node", "--require=dotenv/config", "lib/eth_uniswap_v2/main.js"]
+      },
+      "process:eth_uniswap_v3": {
+        "description": "Load .env and start the ETH squid processor",
+        "deps": ["build", "migration:apply"],
+        "cmd": ["node", "--require=dotenv/config", "lib/eth_uniswap_v3/main.js"]
+      },
       "process:bsc": {
         "description": "Load .env and start the BSC squid processor",
         "deps": ["build", "migration:apply"],
