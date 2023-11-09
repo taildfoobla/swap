@@ -9,7 +9,7 @@ const PoolPostgre = db.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    idSquid: {
+    address: {
       type: DataTypes.STRING,
       unique: true,
     },
@@ -26,6 +26,7 @@ const PoolPostgre = db.define(
         fields: ["id"],
       },
     ],
+    timestamps:false
   }
 );
 

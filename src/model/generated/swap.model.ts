@@ -71,6 +71,7 @@ const SwapPostgre = db.define(
         fields: ["recipient"],
       },
     ],
+    timestamps:false
   }
 );
 

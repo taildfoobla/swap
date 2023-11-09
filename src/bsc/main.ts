@@ -57,12 +57,14 @@ interface SwapData {
   amount1Out: bigint;
 }
 processor.run(new TypeormDatabase({ supportHotBlocks: true,stateSchema: 'bsc_processor' }), async (ctx) => {
+  PoolPostgre.sync()
+ SwapPostgre.sync()
   if (!factoryPools) {
     // factoryPools = await ctx.store
     //   .findBy(Pool, {})
     //   .then((pools) => new Set(pools.map((pool) => pool.id)));
     factoryPools = await PoolPostgre.findAll().then(
-      (pools: any) => new Set(pools.map((pool: any) => pool.id))
+      (pools: any) => new Set(pools.map((pool: any) => pool.address))
     );
   }
   let swapsData = [];
@@ -227,7 +229,7 @@ async function savePools(ctx: Context, poolsData: PoolData[]) {
   let pools: Array<any> = [];
   for (let data of poolsData) {
     let pool = {
-      idSquid: data.id,
+      address: data.id,
       token0: data.token0,
       token1: data.token1,
     }
@@ -257,10 +259,10 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
   }
 
   // let pools = await PoolModel.find({ id: { $in: Array.from(poolIds) } });
-  let pools = await PoolPostgre.findAll({ where: { idSquid: Array.from(poolIds) } });
+  let pools = await PoolPostgre.findAll({ where: { address: Array.from(poolIds) } });
 
   let poolMap: Map<string, any> = new Map(
-    pools.map((pool: any) => [pool.id, pool])
+    pools.map((pool: any) => [pool.address, pool])
   );
   // let swaps: Swap[] = [];
   let Swaps: Array<any> = [];
@@ -276,7 +278,7 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
         blockNumber: block.height,
         timestamp: new Date(block.timestamp),
         txHash: transaction.hash,
-        pool_id: poolEntity.id,
+        pool_id: poolEntity.address,
         pool_token0: poolEntity.token0,
         pool_token1: poolEntity.token1,
         amount0: amount0.toString(),
@@ -299,7 +301,7 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
         blockNumber: block.height,
         timestamp: new Date(block.timestamp),
         txHash: transaction.hash,
-        pool_id: poolEntity.id,
+        pool_id: poolEntity.address,
         pool_token0: inOutToken.token0,
         pool_token1: inOutToken.token1,
         amount0: inOutToken.amount0.toString(),
