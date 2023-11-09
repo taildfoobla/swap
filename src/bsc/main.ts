@@ -56,7 +56,7 @@ interface SwapData {
   amount1In: bigint;
   amount1Out: bigint;
 }
-processor.run(new TypeormDatabase({ supportHotBlocks: true,stateSchema: 'bsc_processor' }), async (ctx) => {
+processor.run(new TypeormDatabase({ supportHotBlocks: true,stateSchema: 'bsc_processor_postgres' }), async (ctx) => {
   PoolPostgre.sync()
  SwapPostgre.sync()
   if (!factoryPools) {

@@ -52,11 +52,13 @@ interface SwapData {
   amount1In: bigint;
   amount1Out: bigint;
 }
+
+
 processor.run(
-  new TypeormDatabase({ supportHotBlocks: true, stateSchema: "eth_processor" }),
+  new TypeormDatabase({ supportHotBlocks: true, stateSchema: "eth_processor_postgres" }),
   async (ctx) => {
-    PoolPostgre.sync()
-    SwapPostgre.sync()
+    await PoolPostgre.sync()
+    await SwapPostgre.sync()
     
     if (!factoryPools) {
       // factoryPools = await ctx.store

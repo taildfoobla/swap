@@ -75,8 +75,8 @@ const SwapPostgre = db.define(
   }
 );
 
-SwapPostgre.sync().then(() => {
-  console.log("table swap product created");
-});
+// SwapPostgre.sync().then(() => {
+//   console.log("table swap product created");
+// });
 
 export default SwapPostgre;

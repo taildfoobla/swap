@@ -30,8 +30,8 @@ const PoolPostgre = db.define(
   }
 );
 
-PoolPostgre.sync().then(() => {
-  console.log("table pool product created");
-});
+// PoolPostgre.sync().then(() => {
+//   console.log("table pool product created");
+// });
 
 export default PoolPostgre;
