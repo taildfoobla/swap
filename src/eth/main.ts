@@ -68,7 +68,6 @@ processor.run(
         (pools: any) => new Set(pools.map((pool: any) => pool.address))
       );
     }
-    console.log("pools",factoryPools)
     let swapsData = [];
     let poolsData = [];
     for (let block of ctx.blocks) {
