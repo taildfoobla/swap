@@ -1,7 +1,7 @@
 {
     "apps": [
         {
-            "name": "swap-eth",
+            "name": "swap-eth-progres",
             "script": "sqd",
             "args" : "process:eth"
         }
