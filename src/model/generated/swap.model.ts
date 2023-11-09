@@ -2,7 +2,7 @@ import { Sequelize, DataTypes } from "sequelize";
 import db from "../../config/db";
 
 const SwapPostgre = db.define(
-  "swap",
+  "swap_transactions",
   {
     id: {
       type: DataTypes.INTEGER,
