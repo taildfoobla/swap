@@ -55,7 +55,7 @@ interface SwapData {
 
 
 processor.run(
-  new TypeormDatabase({ supportHotBlocks: true, stateSchema: "eth_processor_postgres" }),
+  new TypeormDatabase({ supportHotBlocks: true, stateSchema: "eth_processor_postgres_0" }),
   async (ctx) => {
     await PoolPostgre.sync()
     await SwapPostgre.sync()
