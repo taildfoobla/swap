@@ -174,7 +174,7 @@ async function savePools(ctx: Context, poolsData: PoolData[]) {
   let pools: Array<any> = [];
   for (let data of poolsData) {
     let pool = {
-      address: data.id,
+      id: data.id,
       token0: data.token0,
       token1: data.token1,
     };

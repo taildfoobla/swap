@@ -64,13 +64,13 @@ processor.run(
     // await PoolPostgre.sync()
     // await SwapPostgre.sync()
     
-    if (!factoryPools||!PoolData) {
+    if (!factoryPools||!PoolData.length) {
      
       // factoryPools = await PoolPostgre.findAll().then(
       //   (pools: any) => new Set(pools.map((pool: any) => pool.address))
       // );
 
-      PoolData= await PoolModel.findAll({})
+      PoolData= await PoolModel.find({})
       factoryPools = new Set(PoolData.map((pool: any) => pool.address))
     }
     let swapsData = [];
@@ -228,6 +228,7 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
       sender,
     } = data;
     let poolEntity = assertNotNull(poolMap.get(pool));
+    console.log("poolEntity",poolEntity)
     let document;
       document = {
         idSquid:id,
@@ -248,13 +249,14 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
 
   }
 
-  await SwapPostgre.bulkCreate(Swaps,{ignoreDuplicates:true}).then(() => {
+  // await SwapPostgre.bulkCreate(Swaps,{ignoreDuplicates:true}).then(() => {
+  //   console.log('ETH swaps inserted successfully',Swaps.length);
+    
+  // })
+
+  await SwapModel.insertMany(Swaps, { ordered: false }).then(() => {
     console.log('ETH swaps inserted successfully',Swaps.length);
   })
-
-  // await SwapModel.insertMany(Swaps, { ordered: false }).then(() => {
-  //   console.log('ETH swaps inserted successfully',Swaps.length);
-  // })
   // .catch((error:Error) => {
   //   console.error('Error inserting ETH swaps:', error);
   // });
