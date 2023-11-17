@@ -50,26 +50,26 @@ const SwapTransactionSchema = new Schema<
     id: { type: String,unique:true},
     blockNumber: Number,
     timestamp: Date,
-    txHash: String,
+    txHash: {type:String,index:true},
     sender: String,
-    recipient: String,
-    amount0: String,
-    amount1: String,
+    recipient: {type:String,index:true},
+    amount0: {type:String,index:true},
+    amount1: {type:String,index:true},
     pool_id: String,
-    pool_token0: String,
-    pool_token1: String,
-    from:String
+    pool_token0: {type:String,index:true},
+    pool_token1: {type:String,index:true},
+    from:{type:String,index:true},
   },
   { versionKey: false }
 );
 
-SwapTransactionSchema.index({ txHash: 1 });
-SwapTransactionSchema.index({ amount0: 1 });
-SwapTransactionSchema.index({ amount1: 1 });
-SwapTransactionSchema.index({ pool_token0: 1 });
-SwapTransactionSchema.index({ pool_token1: 1 });
-SwapTransactionSchema.index({ from: 1 });
-SwapTransactionSchema.index({ recipient: 1 });
+// SwapTransactionSchema.index({ txHash: 1 });
+// SwapTransactionSchema.index({ amount0: 1 });
+// SwapTransactionSchema.index({ amount1: 1 });
+// SwapTransactionSchema.index({ pool_token0: 1 });
+// SwapTransactionSchema.index({ pool_token1: 1 });
+// SwapTransactionSchema.index({ from: 1 });
+// SwapTransactionSchema.index({ recipient: 1 });
 
 export const getSwapTransactionModel = () => {
   // @ts-ignore

@@ -34,14 +34,14 @@ const PoolSchema = new Schema<
   IPoolModel
 >(
   {
-    id:{type:String,unique:true},
+    id:{type:String,unique:true,index:true},
     token0:String,
     token1:String,
   },
   { versionKey: false }
 );
 
-PoolSchema.index({ id: 1 });
+// PoolSchema.index({ id: 1 });
 
 
 export const getPoolModel = () => {
