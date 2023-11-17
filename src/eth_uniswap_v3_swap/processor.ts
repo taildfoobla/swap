@@ -51,14 +51,13 @@ export const processor = new EvmBatchProcessor()
         }
     })
     .setBlockRange({
-        from: 16000000,
+        from: 0,
     })
-    // .addLog({
-    //     address: [ETH_ADDRESS],
-    //     topic0: [uniswapV3EthFactoryAbi.events.PoolCreated.topic],
-    // })
     .addLog({
         address: [ETH_ADDRESS],
+        topic0: [uniswapV3EthFactoryAbi.events.PoolCreated.topic],
+    })
+    .addLog({
         topic0: [uniswapV3EthPoolAbi.events.Swap.topic],
         transaction: true,
       });
