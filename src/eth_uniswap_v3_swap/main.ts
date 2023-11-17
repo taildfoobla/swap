@@ -243,7 +243,7 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
       blockNumber: block.height,
       timestamp: new Date(block.timestamp),
       txHash: transaction.hash,
-      pool_id: poolEntity.address,
+      pool_id: poolEntity.id,
       pool_token0: poolEntity.token0,
       pool_token1: poolEntity.token1,
       amount0: amount0.toString(),
