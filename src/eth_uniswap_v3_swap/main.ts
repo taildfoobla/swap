@@ -234,9 +234,9 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
       recipient,
       sender,
     } = data;
-    console.log("poollssssssss",pools)
+   
     let poolEntity = assertNotNull(poolMap.get(pool));
-    console.log("poolEntity", poolEntity);
+ 
     let document;
     document = {
       id,

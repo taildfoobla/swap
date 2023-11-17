@@ -236,7 +236,7 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
     } = data;
     let poolEntity = assertNotNull(poolMap.get(pool));
     let document;
-    console.log("poolEntity", poolEntity);
+ 
     const inOutToken = renderInOutToken(
       amount0In,
       amount0Out,
