@@ -77,7 +77,7 @@ processor.run(
       // PoolData= await PoolModel.find({})
       // factoryPools = new Set(PoolData.map((pool: any) => pool.address))
     }
-    let swapsData = [];
+    let swapsData:Array<any> = [];
     let swapsNoPoolData = [];
     let poolsData = [];
     for (let block of ctx.blocks) {
@@ -121,9 +121,11 @@ processor.run(
       }
     }
 
-    await savePools(ctx, poolsData);
+    await savePools(ctx, poolsData).then(async()=>{
+      await saveSwaps(ctx, swapsData);
+    });
 
-    await saveSwaps(ctx, swapsData);
+ 
     // await saveSwapsNoPool(ctx, swapsNoPoolData);
   }
 );
@@ -154,7 +156,7 @@ function decodeSwapLog(log: Log) {
 
 function getPoolData(log: Log): PoolData {
   let event = decodePoolLog(log);
-
+  factoryPools.add(event.pool.toLowerCase())
   return {
     id: event?.pool.toLowerCase(),
     token0: event?.token0.toLowerCase(),
@@ -192,7 +194,7 @@ async function savePools(ctx: Context, poolsData: PoolData[]) {
     };
     pools.push(pool);
 
-    factoryPools.add(data.id);
+    // factoryPools.add(data.id);
   }
   // await PoolPostgre.bulkCreate(pools,{ignoreDuplicates:true})
   await PoolModel.insertMany(pools, { ordered: false })
