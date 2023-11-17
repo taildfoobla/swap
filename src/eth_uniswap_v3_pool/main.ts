@@ -180,7 +180,7 @@ async function savePools(ctx: Context, poolsData: PoolData[]) {
   // await PoolPostgre.bulkCreate(pools,{ignoreDuplicates:true})
   await PoolModel.insertMany(pools, { ordered: false })
     .then(() => {
-      console.log("ETH pools inserted successfully");
+      console.log("ETH pools inserted successfully",pools.length);
     })
     .catch((error: Error) => {
       console.error("Error inserting ETH pools:", error);
