@@ -6,7 +6,7 @@ import { assertNotNull } from "@subsquid/evm-processor";
 import { getSwapTransactionModel } from "../schema/getSwapTransactionModel";
 import fs from "fs";
 import { renderInOutToken } from "../utils";
-import { getPoolModel } from "../schema/getPoolModel";
+import { getPoolModel } from "../eth_uniswap_v3_pool/getPoolModel";
 import { readJsonFromFile, writeJsonToFile } from "../utils";
 import * as uniswapV3EthFactoryAbi from "../abi/uniswap_v3_ethereum_factory";
 import * as uniswapV3EthPoolAbi from "../abi/uniswap_v3_ethereum_pool";
@@ -14,7 +14,7 @@ import * as uniswapV2EthFactoryAbi from "../abi/uniswap_v2_ethereum_factory";
 import * as uniswapV2EthPoolAbi from "../abi/uniswap_v2_ethereum_pool";
 import PoolPostgre from "./pool.model";
 import SwapPostgre from "../model/generated/swap.model";
-
+import { getSwapTransactionNoPoolModel } from "./getSwapTransactionNoPoolModel";
 
 const renderDataFromJson = (obj: { [key: string]: any }, network: string) => {
   let arr: Array<any> = [];
@@ -30,6 +30,7 @@ const renderDataFromJson = (obj: { [key: string]: any }, network: string) => {
 
 // let PoolModel = getPoolModel();
 let factoryPools = new Set<string>();
+let PoolData:Array<any>=[];
 // let address: Object = readJsonFromFile("output.json") || { eth: [] };
 // let result: Array<any> = renderDataFromJson(address, "eth");
 let cacheTrans: Object = { txHash: "", data: {} };
@@ -53,23 +54,28 @@ interface SwapData {
   amount1Out: bigint;
 }
 
+const PoolModel= getPoolModel()
+const SwapModel= getSwapTransactionModel()
+const SwapNoPoolModel = getSwapTransactionNoPoolModel()
 
 processor.run(
   new TypeormDatabase({ supportHotBlocks: true, stateSchema: "eth_processor_uniswapv3" }),
   async (ctx) => {
-    await PoolPostgre.sync()
-    await SwapPostgre.sync()
+    // await PoolPostgre.sync()
+    // await SwapPostgre.sync()
     
-    if (!factoryPools) {
-      // factoryPools = await ctx.store
-      //   .findBy(Pool, {})
-      //   .then((pools) => new Set(pools.map((pool) => pool.id)));
-      factoryPools = await PoolPostgre.findAll().then(
-        (pools: any) => new Set(pools.map((pool: any) => pool.address))
-      );
+    if (!factoryPools||!PoolData) {
+     
+      // factoryPools = await PoolPostgre.findAll().then(
+      //   (pools: any) => new Set(pools.map((pool: any) => pool.address))
+      // );
+
+      PoolData= await PoolModel.findAll({})
+      factoryPools = new Set(PoolData.map((pool: any) => pool.address))
     }
     let swapsData = [];
-    let poolsData = [];
+    let swapsNoPoolData=[];
+    // let poolsData = [];
     for (let block of ctx.blocks) {
       for (let log of block.logs) {
         // if (
@@ -81,13 +87,13 @@ processor.run(
         //   poolsData.push(poolData);
         // } else 
         
-        if (
-          log.topics[0] == uniswapV3EthFactoryAbi.events.PoolCreated.topic &&
-          ETH_ADDRESS==log.address
-        ) {
-          let poolData = getPoolData(log);
-          poolsData.push(poolData);
-        }
+        // if (
+        //   log.topics[0] == uniswapV3EthFactoryAbi.events.PoolCreated.topic &&
+        //   ETH_ADDRESS==log.address
+        // ) {
+        //   let poolData = getPoolData(log);
+        //   poolsData.push(poolData);
+        // }
 
         // if (
         //   log.topics[0] == uniswapV3EthPoolAbi.events.Swap.topic &&
@@ -103,13 +109,17 @@ processor.run(
         ) {
           let swapData = getSwapData(log);
           swapsData.push(swapData);
+        }else if (log.topics[0] == uniswapV3EthPoolAbi.events.Swap.topic){
+          let swapData = getSwapData(log);
+          swapsNoPoolData.push(swapData);
         }
       }
     }
 
-    await savePools(ctx, poolsData);
+    // await savePools(ctx, poolsData);
 
     await saveSwaps(ctx, swapsData);
+    await saveSwapsNoPool(ctx,swapsNoPoolData)
   }
 );
 
@@ -163,27 +173,27 @@ function getSwapData(log: Log) {
     };
 }
 
-async function savePools(ctx: Context, poolsData: PoolData[]) {
-  let pools: Array<any> = [];
-  for (let data of poolsData) {
-    let pool = {
-      address: data.id,
-      token0: data.token0,
-      token1: data.token1,
-    };
-    pools.push(pool);
+// async function savePools(ctx: Context, poolsData: PoolData[]) {
+//   let pools: Array<any> = [];
+//   for (let data of poolsData) {
+//     let pool = {
+//       address: data.id,
+//       token0: data.token0,
+//       token1: data.token1,
+//     };
+//     pools.push(pool);
 
-    factoryPools.add(data.id);
-  }
-  await PoolPostgre.bulkCreate(pools,{ignoreDuplicates:true})
-  // await PoolModel.insertMany(pools, { ordered: false })
-    // .then(() => {
-    //   console.log("ETH pools inserted successfully");
-    // })
-    // .catch((error: Error) => {
-    //   console.error("Error inserting ETH pools:", error);
-    // });
-}
+//     factoryPools.add(data.id);
+//   }
+//   await PoolPostgre.bulkCreate(pools,{ignoreDuplicates:true})
+//   // await PoolModel.insertMany(pools, { ordered: false })
+//     // .then(() => {
+//     //   console.log("ETH pools inserted successfully");
+//     // })
+//     // .catch((error: Error) => {
+//     //   console.error("Error inserting ETH pools:", error);
+//     // });
+// }
 
 async function saveSwaps(ctx: Context, swapsData: Array<any>) {
   let poolIds = new Set<string>();
@@ -192,9 +202,10 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
   for (let data of swapsData) {
     poolIds.add(data.pool);
   }
+  let pools = PoolData.filter((pool)=>Array.from(poolIds).includes(pool.id))
 
   // let pools = await PoolModel.find({ id: { $in: Array.from(poolIds) } });
-  let pools = await PoolPostgre.findAll({ where: { address: Array.from(poolIds) } });
+  // let pools = await PoolPostgre.findAll({ where: { address: Array.from(poolIds) } });
   // console.log("eth",pools[0])
   let poolMap: Map<string, any> = new Map(
     pools.map((pool: any) => [pool.address, pool])
@@ -244,6 +255,71 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
   // await SwapModel.insertMany(Swaps, { ordered: false }).then(() => {
   //   console.log('ETH swaps inserted successfully',Swaps.length);
   // })
+  // .catch((error:Error) => {
+  //   console.error('Error inserting ETH swaps:', error);
+  // });
+}
+
+
+async function saveSwapsNoPool(ctx: Context, swapsData: Array<any>) {
+  // let poolIds = new Set<string>();
+
+  // // const SwapModel = getSwapTransactionModel();
+  // for (let data of swapsData) {
+  //   poolIds.add(data.pool);
+  // }
+
+  // // let pools = await PoolModel.find({ id: { $in: Array.from(poolIds) } });
+  // let pools = await PoolPostgre.findAll({ where: { address: Array.from(poolIds) } });
+  // // console.log("eth",pools[0])
+  // let poolMap: Map<string, any> = new Map(
+  //   pools.map((pool: any) => [pool.address, pool])
+  // );
+  // let swaps: Swap[] = [];
+  let Swaps: Array<any> = [];
+  for (let data of swapsData) {
+    let {
+      id,
+      block,
+      transaction,
+      pool,
+      amount0,
+      amount1,
+      amount0In,
+      amount0Out,
+      amount1In,
+      amount1Out,
+      recipient,
+      sender,
+    } = data;
+    // let poolEntity = assertNotNull(poolMap.get(pool));
+    let document;
+      document = {
+        idSquid:id,
+        blockNumber: block.height,
+        timestamp: new Date(block.timestamp),
+        txHash: transaction.hash,
+        pool_id: pool,
+        // pool_token0: poolEntity.token0,
+        // pool_token1: poolEntity.token1,
+        amount0: amount0.toString(),
+        amount1: amount1.toString(),
+        recipient,
+        sender,
+        from: transaction.from,
+      };
+    
+    Swaps.push(document);
+
+  }
+
+  // await SwapPostgre.bulkCreate(Swaps,{ignoreDuplicates:true}).then(() => {
+  //   console.log('ETH swaps inserted successfully',Swaps.length);
+  // })
+
+  await SwapNoPoolModel.insertMany(Swaps, { ordered: false }).then(() => {
+    console.log('ETH swapsnopool inserted successfully',Swaps.length);
+  })
   // .catch((error:Error) => {
   //   console.error('Error inserting ETH swaps:', error);
   // });
