@@ -187,9 +187,6 @@ async function savePools(ctx: Context, poolsData: PoolData[]) {
     .then(() => {
       console.log("ETH pools inserted successfully",pools.length);
     })
-    .catch((error: Error) => {
-      console.error("Error inserting ETH pools:", error);
-    });
 }
 
 async function saveSwaps(ctx: Context, swapsData: Array<any>) {

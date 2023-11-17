@@ -56,7 +56,7 @@ interface SwapData {
 
 const PoolModel = getPoolModel();
 const SwapModel = getSwapTransactionModel();
-const SwapNoPoolModel = getSwapTransactionNoPoolModel();
+// const SwapNoPoolModel = getSwapTransactionNoPoolModel();
 
 processor.run(
   new TypeormDatabase({
@@ -215,7 +215,7 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
   // let pools = await PoolPostgre.findAll({ where: { address: Array.from(poolIds) } });
   // console.log("eth",pools[0])
   let poolMap: Map<string, any> = new Map(
-    pools.map((pool: any) => [pool.address, pool])
+    pools.map((pool: any) => [pool.id, pool])
   );
   // let swaps: Swap[] = [];
   let Swaps: Array<any> = [];
@@ -234,11 +234,12 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
       recipient,
       sender,
     } = data;
+    console.log("poollssssssss",pools)
     let poolEntity = assertNotNull(poolMap.get(pool));
     console.log("poolEntity", poolEntity);
     let document;
     document = {
-      idSquid: id,
+      id,
       blockNumber: block.height,
       timestamp: new Date(block.timestamp),
       txHash: transaction.hash,
@@ -268,65 +269,65 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
   // });
 }
 
-async function saveSwapsNoPool(ctx: Context, swapsData: Array<any>) {
-  // let poolIds = new Set<string>();
+// async function saveSwapsNoPool(ctx: Context, swapsData: Array<any>) {
+//   // let poolIds = new Set<string>();
 
-  // // const SwapModel = getSwapTransactionModel();
-  // for (let data of swapsData) {
-  //   poolIds.add(data.pool);
-  // }
+//   // // const SwapModel = getSwapTransactionModel();
+//   // for (let data of swapsData) {
+//   //   poolIds.add(data.pool);
+//   // }
 
-  // // let pools = await PoolModel.find({ id: { $in: Array.from(poolIds) } });
-  // let pools = await PoolPostgre.findAll({ where: { address: Array.from(poolIds) } });
-  // // console.log("eth",pools[0])
-  // let poolMap: Map<string, any> = new Map(
-  //   pools.map((pool: any) => [pool.address, pool])
-  // );
-  // let swaps: Swap[] = [];
-  let Swaps: Array<any> = [];
-  for (let data of swapsData) {
-    let {
-      id,
-      block,
-      transaction,
-      pool,
-      amount0,
-      amount1,
-      amount0In,
-      amount0Out,
-      amount1In,
-      amount1Out,
-      recipient,
-      sender,
-    } = data;
-    // let poolEntity = assertNotNull(poolMap.get(pool));
-    let document;
-    document = {
-      idSquid: id,
-      blockNumber: block.height,
-      timestamp: new Date(block.timestamp),
-      txHash: transaction.hash,
-      pool_id: pool,
-      // pool_token0: poolEntity.token0,
-      // pool_token1: poolEntity.token1,
-      amount0: amount0.toString(),
-      amount1: amount1.toString(),
-      recipient,
-      sender,
-      from: transaction.from,
-    };
+//   // // let pools = await PoolModel.find({ id: { $in: Array.from(poolIds) } });
+//   // let pools = await PoolPostgre.findAll({ where: { address: Array.from(poolIds) } });
+//   // // console.log("eth",pools[0])
+//   // let poolMap: Map<string, any> = new Map(
+//   //   pools.map((pool: any) => [pool.address, pool])
+//   // );
+//   // let swaps: Swap[] = [];
+//   let Swaps: Array<any> = [];
+//   for (let data of swapsData) {
+//     let {
+//       id,
+//       block,
+//       transaction,
+//       pool,
+//       amount0,
+//       amount1,
+//       amount0In,
+//       amount0Out,
+//       amount1In,
+//       amount1Out,
+//       recipient,
+//       sender,
+//     } = data;
+//     // let poolEntity = assertNotNull(poolMap.get(pool));
+//     let document;
+//     document = {
+//       idSquid: id,
+//       blockNumber: block.height,
+//       timestamp: new Date(block.timestamp),
+//       txHash: transaction.hash,
+//       pool_id: pool,
+//       // pool_token0: poolEntity.token0,
+//       // pool_token1: poolEntity.token1,
+//       amount0: amount0.toString(),
+//       amount1: amount1.toString(),
+//       recipient,
+//       sender,
+//       from: transaction.from,
+//     };
 
-    Swaps.push(document);
-  }
+//     Swaps.push(document);
+//   }
 
-  // await SwapPostgre.bulkCreate(Swaps,{ignoreDuplicates:true}).then(() => {
-  //   console.log('ETH swaps inserted successfully',Swaps.length);
-  // })
+//   // await SwapPostgre.bulkCreate(Swaps,{ignoreDuplicates:true}).then(() => {
+//   //   console.log('ETH swaps inserted successfully',Swaps.length);
+//   // })
 
-  await SwapNoPoolModel.insertMany(Swaps, { ordered: false }).then(() => {
-    console.log("ETH swapsnopool inserted successfully", Swaps.length);
-  });
-  // .catch((error:Error) => {
-  //   console.error('Error inserting ETH swaps:', error);
-  // });
-}
+//   await SwapNoPoolModel.insertMany(Swaps, { ordered: false }).then(() => {
+//     console.log("ETH swapsnopool inserted successfully", Swaps.length);
+//   });
+//   // .catch((error:Error) => {
+//   //   console.error('Error inserting ETH swaps:', error);
+//   // });
+// }
