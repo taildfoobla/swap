@@ -48,7 +48,11 @@ export const processor = new EvmBatchProcessor()
     .setFields({
         log: {
             transactionHash: true
-        }
+        },
+        transaction: {
+            from: true,
+            to: true
+          }
     })
     .setBlockRange({
         from: 18593441,
