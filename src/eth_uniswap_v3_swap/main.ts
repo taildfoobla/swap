@@ -188,9 +188,10 @@ async function savePools(ctx: Context, poolsData: PoolData[]) {
       token0: data.token0,
       token1: data.token1,
     };
-    pools.push(pool);
-
-    factoryPools.add(data.id);
+    if(!factoryPools.has(data.id)){
+      pools.push(pool);
+      factoryPools.add(data.id);
+    }
   }
   // await PoolPostgre.bulkCreate(pools,{ignoreDuplicates:true})
   await PoolModel.insertMany(pools, { ordered: false })
