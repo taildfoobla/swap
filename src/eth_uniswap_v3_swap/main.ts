@@ -12,9 +12,9 @@ import * as uniswapV3EthFactoryAbi from "../abi/uniswap_v3_ethereum_factory";
 import * as uniswapV3EthPoolAbi from "../abi/uniswap_v3_ethereum_pool";
 import * as uniswapV2EthFactoryAbi from "../abi/uniswap_v2_ethereum_factory";
 import * as uniswapV2EthPoolAbi from "../abi/uniswap_v2_ethereum_pool";
-import PoolPostgre from "./pool.model";
-import SwapPostgre from "../model/generated/swap.model";
-import { getSwapTransactionNoPoolModel } from "./getSwapTransactionNoPoolModel";
+// import PoolPostgre from "./pool.model";
+// import SwapPostgre from "../model/generated/swap.model";
+
 
 
 const renderDataFromJson = (obj: { [key: string]: any }, network: string) => {
