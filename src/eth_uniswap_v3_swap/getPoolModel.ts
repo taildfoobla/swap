@@ -7,7 +7,7 @@ import { boolean } from "../model/generated/marshal";
 //   "mongodb://localhost:27027/pj5545 " as string
 // );
 const mongoose = createConnection(
-  "mongodb://moonfit-mongodb1:27017,moonfit-mongodb3:27017,moonfit-mongodbarbiter:27017/pj5545?replicaSet=pp5545" as string
+  "moonfit-mongodb3:27017/pj5545" as string
 );
 // const mongoose = createConnection(
 //   "mongodb+srv://taild:RAwNxMCiIVC6tkCq@cluster0.z1xx4yf.mongodb.net/swap" as string
