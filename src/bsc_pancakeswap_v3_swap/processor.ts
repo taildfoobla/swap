@@ -48,19 +48,23 @@ export const processor = new EvmBatchProcessor()
     .setFields({
         log: {
             transactionHash: true
-        }
+        },
+        transaction: {
+            from: true,
+            to: true
+          }
     })
     .setBlockRange({
-        from: 0,
+        from: 6000000,
     })
     .addLog({
         address: [ETH_ADDRESS],
         topic0: [uniswapV3EthFactoryAbi.events.PoolCreated.topic],
     })
-    // .addLog({
-    //     topic0: [uniswapV3EthPoolAbi.events.Swap.topic],
-    //     transaction: true,
-    //   });
+    .addLog({
+        topic0: [uniswapV3EthPoolAbi.events.Swap.topic],
+        transaction: true,
+      });
 
 export type Fields = EvmBatchProcessorFields<typeof processor>
 export type Context = DataHandlerContext<Store, Fields>
