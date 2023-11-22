@@ -23,25 +23,22 @@ const mongoose = createConnection(
 
 export interface IPool {
   id: String;
-  token0:String;
-  token1:String;
+  token0: String;
+  token1: String;
 }
 
 interface IPoolModel extends Model<IPool, {}> {}
 
-const PoolSchema = new Schema<
-  IPool,
-  IPoolModel
->(
+const PoolSchema = new Schema<IPool, IPoolModel>(
   {
-    id:{type:String,unique:true},
-    token0:String,
-    token1:String,
-  }
+    id: { type: String, unique: true },
+    token0: String,
+    token1: String,
+  },
+  { versionKey: false }
 );
 
 // PoolSchema.index({ id: 1 });
-
 
 export const getPoolModel = () => {
   // @ts-ignore

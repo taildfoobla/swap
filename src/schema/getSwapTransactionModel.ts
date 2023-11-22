@@ -35,9 +35,9 @@ export interface ISwapTransaction {
   pool_id: String;
   pool_token0: String;
   pool_token1: String;
-  network:String;
-  dex:String;
-  from:String;
+  network: String;
+  dex: String;
+  from: String;
 }
 
 interface ISwapTransactionModel extends Model<ISwapTransaction, {}> {}
@@ -47,7 +47,7 @@ const SwapTransactionSchema = new Schema<
   ISwapTransactionModel
 >(
   {
-    id: { type: String,unique:true},
+    id: { type: String, unique: true },
     blockNumber: Number,
     timestamp: Date,
     txHash: String,
@@ -58,18 +58,18 @@ const SwapTransactionSchema = new Schema<
     pool_id: String,
     pool_token0: String,
     pool_token1: String,
-    from:String
+    from: String,
   },
   { versionKey: false }
 );
 
-SwapTransactionSchema.index({ txHash: 1 });
-SwapTransactionSchema.index({ amount0: 1 });
-SwapTransactionSchema.index({ amount1: 1 });
-SwapTransactionSchema.index({ pool_token0: 1 });
-SwapTransactionSchema.index({ pool_token1: 1 });
-SwapTransactionSchema.index({ from: 1 });
-SwapTransactionSchema.index({ recipient: 1 });
+// SwapTransactionSchema.index({ txHash: 1 });
+// SwapTransactionSchema.index({ amount0: 1 });
+// SwapTransactionSchema.index({ amount1: 1 });
+// SwapTransactionSchema.index({ pool_token0: 1 });
+// SwapTransactionSchema.index({ pool_token1: 1 });
+// SwapTransactionSchema.index({ from: 1 });
+// SwapTransactionSchema.index({ recipient: 1 });
 
 export const getSwapTransactionModel = () => {
   // @ts-ignore
