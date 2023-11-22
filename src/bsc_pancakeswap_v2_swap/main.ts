@@ -199,7 +199,7 @@ async function savePools(ctx: Context, poolsData: PoolData[]) {
  
   }
   // await PoolPostgre.bulkCreate(pools,{ignoreDuplicates:true})
-  await PoolModel.insertMany(pools, { ordered: false })
+  await PoolModel.insertMany(pools, { ordered: false})
     .then(() => {
       console.log("BSC pools inserted successfully", pools.length);
     })
@@ -271,7 +271,7 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
   //   console.log('ETH swaps inserted successfully',Swaps.length);
   // })
 
-  await SwapModel.insertMany(Swaps, { ordered: false }).then(() => {
+  await SwapModel.insertMany(Swaps, { ordered: false}).then(() => {
     console.log("BSC swaps inserted successfully", Swaps.length);
   });
   // .catch((error:Error) => {

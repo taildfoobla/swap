@@ -9,7 +9,7 @@ import { Decimal128 } from "typeorm";
 // );
 
 const mongoose = createConnection(
-  "mongodb://moonfit-mongodb1:27017,moonfit-mongodb3:27017,moonfit-mongodbarbiter:27017/pj5545?replicaSet=pp5545" as string
+  "moonfit-mongodb3:27017/pj5545" as string
 );
 
 // const mongoose = createConnection(

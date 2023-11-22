@@ -15,7 +15,7 @@ import * as uniswapV2EthPoolAbi from "../abi/uniswap_v2_ethereum_pool";
 import PoolPostgre from "./pool.model";
 import SwapPostgre from "../model/generated/swap.model";
 import { getSwapTransactionNoPoolModel } from "./getSwapTransactionNoPoolModel";
-import { getNumberModel } from "../schema/getNumberModel";
+
 
 const renderDataFromJson = (obj: { [key: string]: any }, network: string) => {
   let arr: Array<any> = [];
@@ -57,9 +57,9 @@ interface SwapData {
 
 const PoolModel = getPoolModel();
 const SwapModel = getSwapTransactionModel();
-const NumberAddedModel = getNumberModel();
 
-let NumberAdded = 0;
+
+
 // const SwapNoPoolModel = getSwapTransactionNoPoolModel();
 
 processor.run(
@@ -70,10 +70,6 @@ processor.run(
   async (ctx) => {
     // await PoolPostgre.sync()
     // await SwapPostgre.sync()
-    if (NumberAdded === 0) {
-      const data= await NumberAddedModel.findOne({ name: "uniswap_v2" });
-      NumberAdded=data?.add || 0
-    }
     if (!factoryPools) {
       // factoryPools = await PoolPostgre.findAll().then(
       //   (pools: any) => new Set(pools.map((pool: any) => pool.address))
@@ -272,12 +268,7 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
   await SwapModel.insertMany(Swaps, { ordered: false }).then(async () => {
     console.log("ETH swaps inserted successfully", Swaps.length);
 
-    NumberAdded += Swaps.length;
-    await NumberAddedModel.findOneAndUpdate(
-      { name: "uniswap_v3" },
-      { add: NumberAdded },
-      { upsert: true }
-    );
+   
   });
   // .catch((error:Error) => {
   //   console.error('Error inserting ETH swaps:', error);
