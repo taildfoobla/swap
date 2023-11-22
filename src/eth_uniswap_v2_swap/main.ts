@@ -6,7 +6,7 @@ import { assertNotNull } from "@subsquid/evm-processor";
 import { getSwapTransactionModel } from "../schema/getSwapTransactionModel";
 import fs from "fs";
 import { renderInOutToken } from "../utils";
-import { getPoolModel } from "../eth_uniswap_v2_pool/getPoolModel";
+import { getPoolModel } from "./getPoolModel";
 import { getSwapTransactionNoPoolModel } from "./getSwapTransactionNoPoolModel";
 import { readJsonFromFile, writeJsonToFile } from "../utils";
 import * as uniswapV3EthFactoryAbi from "../abi/uniswap_v3_ethereum_factory";
@@ -107,6 +107,7 @@ processor.run(
         //   let swapData = getSwapData(log, "uniswapv3");
         //   swapsData.push(swapData);
         // } else
+
         if (
           log.topics[0] == uniswapV2EthPoolAbi.events.Swap.topic &&
           factoryPools.has(log.address)
@@ -192,10 +193,10 @@ async function savePools(ctx: Context, poolsData: PoolData[]) {
       token0: data.token0,
       token1: data.token1,
     };
-    if(!factoryPools.has(data.id)){
+ 
       pools.push(pool);
       factoryPools.add(data.id);
-    }
+ 
   }
   // await PoolPostgre.bulkCreate(pools,{ignoreDuplicates:true})
   await PoolModel.insertMany(pools, { ordered: false })

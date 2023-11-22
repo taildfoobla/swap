@@ -6,7 +6,7 @@ import { assertNotNull } from "@subsquid/evm-processor";
 import { getSwapTransactionModel } from "../schema/getSwapTransactionModel";
 import fs from "fs";
 import { renderInOutToken } from "../utils";
-import { getPoolModel } from "./getPoolModel";
+import { getPoolModel } from "../eth_uniswap_v3_swap/getPoolModel";
 import { readJsonFromFile, writeJsonToFile } from "../utils";
 import * as uniswapV3EthFactoryAbi from "../abi/uniswap_v3_ethereum_factory";
 import * as uniswapV3EthPoolAbi from "../abi/uniswap_v3_ethereum_pool";
