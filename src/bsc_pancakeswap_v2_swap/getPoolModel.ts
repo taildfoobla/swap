@@ -31,7 +31,7 @@ interface IPoolModel extends Model<IPool, {}> {}
 
 const PoolSchema = new Schema<IPool, IPoolModel>(
   {
-    id: { type: String, unique: true },
+    id: { type: String },
     token0: String,
     token1: String,
   },
