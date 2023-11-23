@@ -192,30 +192,31 @@ function getSwapData(log: Log) {
 async function savePools(ctx: Context, poolsData: PoolData[]) {
   let pools: Array<any> = [];
   for (let data of poolsData) {
-    let pool = {
-      id: data.id,
-      token0: data.token0,
-      token1: data.token1,
-    };
     // let pool = {
-    //   insertOne: {
-    //     document: {
-    //       id: data.id,
-    //       token0: data.token0,
-    //       token1: data.token1,
-    //     },
-    //   },
+    //   id: data.id,
+    //   token0: data.token0,
+    //   token1: data.token1,
     // };
+    let pool = {
+      insertOne: {
+        document: {
+          id: data.id,
+          token0: data.token0,
+          token1: data.token1,
+        },
+      },
+    };
 
     pools.push(pool);
     factoryPools.add(data.id);
   }
   // await PoolPostgre.bulkCreate(pools,{ignoreDuplicates:true})
-  await PoolModel.insertMany(pools, { ordered: false, rawResult: true }).then(
-    () => {
-      console.log("BSC pools inserted successfully", pools.length);
-    }
-  );
+  await PoolModel.bulkWrite(pools, {
+    ordered: false,
+    ignoreDuplicates: true,
+  }).then(() => {
+    console.log("BSC pools bulkWrite successfully", pools.length);
+  });
 }
 
 async function saveSwaps(ctx: Context, swapsData: Array<any>) {
