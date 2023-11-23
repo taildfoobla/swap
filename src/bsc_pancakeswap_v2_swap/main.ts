@@ -13,8 +13,8 @@ import * as uniswapV3EthFactoryAbi from "../abi/uniswap_v3_ethereum_factory";
 import * as uniswapV3EthPoolAbi from "../abi/uniswap_v3_ethereum_pool";
 import * as uniswapV2EthFactoryAbi from "../abi/uniswap_v2_ethereum_factory";
 import * as uniswapV2EthPoolAbi from "../abi/uniswap_v2_ethereum_pool";
-import * as pancakeswapV2BscFactoryAbi from "../abi/pancakeswap_v2_binance_factory"
-import * as pancakeswapV2BscPoolAbi from "../abi/pancakeswap_v2_binance_pool"
+import * as pancakeswapV2BscFactoryAbi from "../abi/pancakeswap_v2_binance_factory";
+import * as pancakeswapV2BscPoolAbi from "../abi/pancakeswap_v2_binance_pool";
 
 const renderDataFromJson = (obj: { [key: string]: any }, network: string) => {
   let arr: Array<any> = [];
@@ -30,6 +30,7 @@ const renderDataFromJson = (obj: { [key: string]: any }, network: string) => {
 
 // let PoolModel = getPoolModel();
 let factoryPools = new Set<string>();
+let allIds = new Set<string>();
 let PoolData: Array<any> = [];
 // let address: Object = readJsonFromFile("output.json") || { eth: [] };
 // let result: Array<any> = renderDataFromJson(address, "eth");
@@ -73,11 +74,14 @@ processor.run(
       factoryPools = await PoolModel.find({}).then(
         (pools: any) => new Set(pools.map((pool: any) => pool.address))
       );
+      allIds = await PoolModel.find({}).then(
+        (pools: any) => new Set(pools.map((pool: any) => pool.address))
+      );
 
       // PoolData= await PoolModel.find({})
       // factoryPools = new Set(PoolData.map((pool: any) => pool.address))
     }
-    let swapsData:Array<any> = [];
+    let swapsData: Array<any> = [];
     let swapsNoPoolData = [];
     let poolsData = [];
     for (let block of ctx.blocks) {
@@ -92,7 +96,8 @@ processor.run(
         // } else
 
         if (
-          log.topics[0] == pancakeswapV2BscFactoryAbi.events.PairCreated.topic &&
+          log.topics[0] ==
+            pancakeswapV2BscFactoryAbi.events.PairCreated.topic &&
           ETH_ADDRESS == log.address
         ) {
           let poolData = getPoolData(log);
@@ -114,7 +119,7 @@ processor.run(
         ) {
           let swapData = getSwapData(log);
           swapsData.push(swapData);
-        } 
+        }
         // else if (log.topics[0] == uniswapV2EthPoolAbi.events.Swap.topic) {
         //   let swapData = getSwapData(log);
         //   swapsNoPoolData.push(swapData);
@@ -122,11 +127,10 @@ processor.run(
       }
     }
 
-    await savePools(ctx, poolsData).then(async()=>{
+    await savePools(ctx, poolsData).then(async () => {
       await saveSwaps(ctx, swapsData);
     });
 
- 
     // await saveSwapsNoPool(ctx, swapsNoPoolData);
   }
 );
@@ -157,7 +161,7 @@ function decodeSwapLog(log: Log) {
 
 function getPoolData(log: Log): PoolData {
   let event = decodePoolLog(log);
-  factoryPools.add(event.pool.toLowerCase())
+  factoryPools.add(event.pool.toLowerCase());
   return {
     id: event?.pool.toLowerCase(),
     token0: event?.token0.toLowerCase(),
@@ -193,16 +197,25 @@ async function savePools(ctx: Context, poolsData: PoolData[]) {
       token0: data.token0,
       token1: data.token1,
     };
- 
-      pools.push(pool);
-      factoryPools.add(data.id);
- 
+    // let pool = {
+    //   insertOne: {
+    //     document: {
+    //       id: data.id,
+    //       token0: data.token0,
+    //       token1: data.token1,
+    //     },
+    //   },
+    // };
+
+    pools.push(pool);
+    factoryPools.add(data.id);
   }
   // await PoolPostgre.bulkCreate(pools,{ignoreDuplicates:true})
-  await PoolModel.insertMany(pools, { ordered: false})
-    .then(() => {
+  await PoolModel.insertMany(pools, { ordered: false, rawResult: true }).then(
+    () => {
       console.log("BSC pools inserted successfully", pools.length);
-    })
+    }
+  );
 }
 
 async function saveSwaps(ctx: Context, swapsData: Array<any>) {
@@ -240,7 +253,7 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
     } = data;
     let poolEntity = assertNotNull(poolMap.get(pool));
     let document;
- 
+
     const inOutToken = renderInOutToken(
       amount0In,
       amount0Out,
@@ -271,9 +284,11 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
   //   console.log('ETH swaps inserted successfully',Swaps.length);
   // })
 
-  await SwapModel.insertMany(Swaps, { ordered: false}).then(() => {
-    console.log("BSC swaps inserted successfully", Swaps.length);
-  });
+  await SwapModel.insertMany(Swaps, { ordered: false, rawResult: true }).then(
+    () => {
+      console.log("BSC swaps inserted successfully", Swaps.length);
+    }
+  );
   // .catch((error:Error) => {
   //   console.error('Error inserting ETH swaps:', error);
   // });
