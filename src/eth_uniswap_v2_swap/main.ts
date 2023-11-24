@@ -274,7 +274,7 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
   // })
 
   await SwapModel.insertMany(Swaps, { ordered: false }).then(async() => {
-    console.log("ETH swaps inserted successfully", Swaps.length);
+    console.log("ETH swaps 2 inserted successfully", Swaps.length);
   
    
   });
