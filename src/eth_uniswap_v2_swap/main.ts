@@ -110,8 +110,9 @@ processor.run(
         // } else
 
         if (
-          log.topics[0] == uniswapV2EthPoolAbi.events.Swap.topic &&
-          factoryPools.has(log.address)
+          log.topics[0] == uniswapV2EthPoolAbi.events.Swap.topic 
+          // &&
+          // factoryPools.has(log.address)
         ) {
           let swapData = getSwapData(log);
           swapsData.push(swapData);
