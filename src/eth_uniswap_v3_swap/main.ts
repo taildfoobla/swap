@@ -242,22 +242,40 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
 
     // let poolEntity = assertNotNull(poolMap.get(pool));
     let poolEntity = poolMap.get(pool);
-
     let document;
-    document = {
-      id,
-      blockNumber: block.height,
-      timestamp: new Date(block.timestamp),
-      txHash: transaction.hash,
-      pool_id: pool,
-      pool_token0: poolEntity.token0||null,
-      pool_token1: poolEntity.token1||null,
-      amount0: amount0.toString(),
-      amount1: amount1.toString(),
-      recipient,
-      sender,
-      from: transaction.from,
-    };
+    if(poolEntity!==undefined){
+      document = {
+        id,
+        blockNumber: block.height,
+        timestamp: new Date(block.timestamp),
+        txHash: transaction.hash,
+        pool_id: pool,
+        pool_token0: poolEntity.token0,
+        pool_token1: poolEntity.token1,
+        amount0: amount0.toString(),
+        amount1: amount1.toString(),
+        recipient,
+        sender,
+        from: transaction.from,
+      };
+    }else{
+      document = {
+        id,
+        blockNumber: block.height,
+        timestamp: new Date(block.timestamp),
+        txHash: transaction.hash,
+        pool_id: pool,
+        pool_token0: null,
+        pool_token1: null,
+        amount0: amount0.toString(),
+        amount1: amount1.toString(),
+        recipient,
+        sender,
+        from: transaction.from,
+      };
+    }
+  
+   
 
     Swaps.push(document);
   }

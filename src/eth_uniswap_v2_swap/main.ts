@@ -253,7 +253,7 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
       poolEntity.token0,
       poolEntity.token1
     );
-    if(poolEntity!==null){
+    if(poolEntity!==undefined){
       document = {
         id,
         blockNumber: block.height,
