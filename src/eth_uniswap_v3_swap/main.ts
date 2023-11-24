@@ -240,7 +240,8 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
       sender,
     } = data;
 
-    let poolEntity = assertNotNull(poolMap.get(pool));
+    // let poolEntity = assertNotNull(poolMap.get(pool));
+    let poolEntity = poolMap.get(pool);
 
     let document;
     document = {
@@ -248,9 +249,9 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
       blockNumber: block.height,
       timestamp: new Date(block.timestamp),
       txHash: transaction.hash,
-      pool_id: poolEntity.id,
-      pool_token0: poolEntity.token0,
-      pool_token1: poolEntity.token1,
+      pool_id: pool,
+      pool_token0: poolEntity.token0||null,
+      pool_token1: poolEntity.token1||null,
       amount0: amount0.toString(),
       amount1: amount1.toString(),
       recipient,
