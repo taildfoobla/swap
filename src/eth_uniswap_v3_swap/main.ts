@@ -243,7 +243,7 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
     // let poolEntity = assertNotNull(poolMap.get(pool));
     let poolEntity = poolMap.get(pool);
     let document;
-    if(poolEntity!==undefined){
+    if(poolEntity!==undefined&&poolEntity!==null){
       document = {
         id,
         blockNumber: block.height,
