@@ -241,15 +241,16 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
 
     let document;
 
-    const inOutToken = renderInOutToken(
-      amount0In,
-      amount0Out,
-      amount1In,
-      amount1Out,
-      poolEntity.token0,
-      poolEntity.token1
-    );
+   
     if (poolEntity !== undefined&&poolEntity!==null) {
+      const inOutToken = renderInOutToken(
+        amount0In,
+        amount0Out,
+        amount1In,
+        amount1Out,
+        poolEntity.token0,
+        poolEntity.token1
+      );
       document = {
         id,
         blockNumber: block.height,
