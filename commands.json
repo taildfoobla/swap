@@ -79,6 +79,16 @@
         "deps": ["build", "migration:apply"],
         "cmd": ["node", "--require=dotenv/config", "lib/bsc_pancakeswap_v3_swap/main.js"]
       },
+      "process:eth_sushiswap_v2_swap": {
+        "description": "Load .env and start the ETH squid processor",
+        "deps": ["build", "migration:apply"],
+        "cmd": ["node", "--require=dotenv/config", "lib/eth_sushiswap_v2_swap/main.js"]
+      },
+      "process:eth_sushiswap_v2_swap2": {
+        "description": "Load .env and start the ETH squid processor",
+        "deps": ["build", "migration:apply"],
+        "cmd": ["node", "--require=dotenv/config", "lib/eth_sushiswap_v2_swap/main.js"]
+      },
       "process:bsc": {
         "description": "Load .env and start the BSC squid processor",
         "deps": ["build", "migration:apply"],
