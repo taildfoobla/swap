@@ -274,28 +274,30 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
         sender,
         from: transaction.from,
       };
-    } else {
-      document = {
-        id,
-        blockNumber: block.height,
-        timestamp: new Date(block.timestamp),
-        txHash: transaction.hash,
-        pool_id: pool,
-        // pool_token0: inOutToken.token0,
-        // pool_token1: inOutToken.token1,
-        // amount0: inOutToken.amount0.toString(),
-        // amount1: inOutToken.amount1.toString(),
-        pool_token0: null,
-        pool_token1: null,
-        amount0: null,
-        amount1: null,
-        recipient,
-        sender,
-        from: transaction.from,
-      };
-    }
+      Swaps.push(document);
+    } 
+    // else {
+    //   document = {
+    //     id,
+    //     blockNumber: block.height,
+    //     timestamp: new Date(block.timestamp),
+    //     txHash: transaction.hash,
+    //     pool_id: pool,
+    //     // pool_token0: inOutToken.token0,
+    //     // pool_token1: inOutToken.token1,
+    //     // amount0: inOutToken.amount0.toString(),
+    //     // amount1: inOutToken.amount1.toString(),
+    //     pool_token0: null,
+    //     pool_token1: null,
+    //     amount0: null,
+    //     amount1: null,
+    //     recipient,
+    //     sender,
+    //     from: transaction.from,
+    //   };
+    // }
 
-    Swaps.push(document);
+  
   }
 
   // await SwapPostgre.bulkCreate(Swaps,{ignoreDuplicates:true}).then(() => {
