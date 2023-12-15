@@ -14,7 +14,17 @@ const apps = [
         "name": "ETH_Sushiswap_v2",
         "script": "sqd",
         "args" : "process:eth_sushiswap_v2_swap"
-    }
+    },
+    {
+        "name": "ARB_Camelot_v2",
+        "script": "sqd",
+        "args" : "process:arb_camelot_v2_swap"
+    },
+    {
+        "name": "BSC_Pancakeswap_v2",
+        "script": "sqd",
+        "args" : "process:bsc_pancakeswap_v2_swap"
+    },
 
 ];
 
