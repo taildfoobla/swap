@@ -89,6 +89,11 @@
         "deps": ["build", "migration:apply"],
         "cmd": ["node", "--require=dotenv/config", "lib/eth_sushiswap_v2_swap/main.js"]
       },
+      "process:arb_camelot_v2_swap": {
+        "description": "Load .env and start the ETH squid processor",
+        "deps": ["build", "migration:apply"],
+        "cmd": ["node", "--require=dotenv/config", "lib/arb_camelot_v2_swap/main.js"]
+      },
       "process:bsc": {
         "description": "Load .env and start the BSC squid processor",
         "deps": ["build", "migration:apply"],

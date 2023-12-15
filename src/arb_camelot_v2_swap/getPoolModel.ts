@@ -31,7 +31,7 @@ interface IPoolModel extends Model<IPool, {}> {}
 
 const PoolSchema = new Schema<IPool, IPoolModel>(
   {
-    id: { type: String,unique:true },
+    id: { type: String, unique: true },
     token0: String,
     token1: String,
   },
@@ -42,8 +42,5 @@ const PoolSchema = new Schema<IPool, IPoolModel>(
 
 export const getPoolModel = () => {
   // @ts-ignore
-  return mongoose.model<IPool, IPoolModel>(
-    `bsc_pancakeswap_v2_pools`,
-    PoolSchema
-  );
+  return mongoose.model<IPool, IPoolModel>(`arb_camelot_v2_pools`, PoolSchema);
 };
