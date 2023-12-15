@@ -202,9 +202,14 @@ async function savePools(ctx: Context, poolsData: PoolData[]) {
     factoryPools.add(data.id);
   }
   // await PoolPostgre.bulkCreate(pools,{ignoreDuplicates:true})
-  await PoolModel.insertMany(pools, { ordered: false }).then(() => {
-    console.log("ETH pools inserted successfully", pools.length);
-  });
+  try{
+    await PoolModel.insertMany(pools, { ordered: false }).then(() => {
+      console.log("ETH pools inserted successfully", pools.length);
+    });
+  }catch(err){
+    return Promise.resolve(err)
+  }
+  
 }
 
 async function saveSwaps(ctx: Context, swapsData: Array<any>) {
@@ -269,37 +274,45 @@ async function saveSwaps(ctx: Context, swapsData: Array<any>) {
         sender,
         from: transaction.from,
       };
-    } else {
-      document = {
-        id,
-        blockNumber: block.height,
-        timestamp: new Date(block.timestamp),
-        txHash: transaction.hash,
-        pool_id: pool,
-        // pool_token0: inOutToken.token0,
-        // pool_token1: inOutToken.token1,
-        // amount0: inOutToken.amount0.toString(),
-        // amount1: inOutToken.amount1.toString(),
-        pool_token0: null,
-        pool_token1: null,
-        amount0: null,
-        amount1: null,
-        recipient,
-        sender,
-        from: transaction.from,
-      };
-    }
+      Swaps.push(document);
+    } 
+    // else {
+    //   document = {
+    //     id,
+    //     blockNumber: block.height,
+    //     timestamp: new Date(block.timestamp),
+    //     txHash: transaction.hash,
+    //     pool_id: pool,
+    //     // pool_token0: inOutToken.token0,
+    //     // pool_token1: inOutToken.token1,
+    //     // amount0: inOutToken.amount0.toString(),
+    //     // amount1: inOutToken.amount1.toString(),
+    //     pool_token0: null,
+    //     pool_token1: null,
+    //     amount0: null,
+    //     amount1: null,
+    //     recipient,
+    //     sender,
+    //     from: transaction.from,
+    //   };
+    // }
 
-    Swaps.push(document);
+  
   }
 
   // await SwapPostgre.bulkCreate(Swaps,{ignoreDuplicates:true}).then(() => {
   //   console.log('ETH swaps inserted successfully',Swaps.length);
   // })
 
-  await SwapModel.insertMany(Swaps, { ordered: false }).then(async () => {
-    console.log("ETH swaps 2 inserted successfully", Swaps.length);
-  });
+  try{
+    await SwapModel.insertMany(Swaps, { ordered: false }).then(async () => {
+      console.log("ETH swaps 2 inserted successfully", Swaps.length);
+    });
+  }catch(err){
+    return Promise.resolve(err)
+  }
+
+  
   // .catch((error:Error) => {
   //   console.error('Error inserting ETH swaps:', error);
   // });
