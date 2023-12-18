@@ -60,7 +60,7 @@ const SwapModel = getSwapTransactionModel();
 processor.run(
   new TypeormDatabase({
     supportHotBlocks: true,
-    stateSchema: "bsc_processor_pancakeswapv3",
+    stateSchema: "bsc_processor_pancakeswap_v3",
   }),
   async (ctx) => {
     // await PoolPostgre.sync()
