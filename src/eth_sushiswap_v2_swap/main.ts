@@ -63,7 +63,7 @@ const SwapModel = getSwapTransactionModel();
 processor.run(
   new TypeormDatabase({
     supportHotBlocks: true,
-    stateSchema: "eth_processor_sushiswapv2",
+    stateSchema: "eth_processor_sushiswap_v2",
   }),
   async (ctx) => {
     // await PoolPostgre.sync()
