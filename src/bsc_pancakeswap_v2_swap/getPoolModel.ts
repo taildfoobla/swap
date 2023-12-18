@@ -3,12 +3,12 @@ import createConnection from "../config/mongoose";
 import { Numeric } from "ethers";
 import { Decimal128 } from "typeorm";
 import { boolean } from "../model/generated/marshal";
-const mongoose = createConnection(
-  "mongodb://localhost:27017/pj5545 " as string
-);
 // const mongoose = createConnection(
-//   "mongodb://moonfit-mongodb3:27017/pj5545" as string
+//   "mongodb://localhost:27017/pj5545 " as string
 // );
+const mongoose = createConnection(
+  "mongodb://moonfit-mongodb3:27017/pj5545" as string
+);
 // const mongoose = createConnection(
 //   "mongodb+srv://taild:RAwNxMCiIVC6tkCq@cluster0.z1xx4yf.mongodb.net/swap" as string
 // );
