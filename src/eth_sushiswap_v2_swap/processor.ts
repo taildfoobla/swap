@@ -59,7 +59,7 @@ export const processor = new EvmBatchProcessor()
           }
     })
     .setBlockRange({
-        from: 18787805,
+        from: 18809169,
     })
     .addLog({
         address: [ETH_ADDRESS],
