@@ -30,16 +30,16 @@ const apps = [
     //     "script": "sqd",
     //     "args" : "process:eth_balancer_v1_swap"
     // },
-    // {
-    //     "name": "ETH_Balancer_v2",
-    //     "script": "sqd",
-    //     "args" : "process:eth_balancer_v2_swap"
-    // },
     {
-        "name": "BSC_Pancakeswap_v3",
+        "name": "ETH_Balancer_v2",
         "script": "sqd",
-        "args" : "process:bsc_pancakeswap_v3_swap"
-    },
+        "args" : "process:eth_balancer_v2_swap"
+    }
+    // {
+    //     "name": "BSC_Pancakeswap_v3",
+    //     "script": "sqd",
+    //     "args" : "process:bsc_pancakeswap_v3_swap"
+    // },
 
 ];
 
